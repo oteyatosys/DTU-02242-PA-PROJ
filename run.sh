@@ -21,8 +21,11 @@ mkdir -p ./data
 # Clean and build the java-example
 mvn -q -f java-example/pom.xml clean package
 
-# Copy the java-example to ./data/classes
-cp -r java-example/target/classes data/
+# Copy the java-example class files to ./data/classes
+cp -r java-example/target/classes/ data/classes/
+
+# Copy the java-example source files to ./data/source
+cp -r java-example/src/main/java/ data/source/
 
 # Convert all classes to bytecode
 for file in $(find data/classes -name "*.class"); do
