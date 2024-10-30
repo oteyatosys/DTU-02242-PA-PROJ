@@ -1,0 +1,20 @@
+[project]
+name = "DTU-02242-PA-PROJ"
+version = "0.1.0"
+description = "Default template for PDM package"
+authors = [
+    {name = "Michael Andersen", email = "michael@otey.dk"},
+]
+dependencies = [
+    "hypothesis>=6.115.5",
+    "jmespath>=1.0.1",
+]
+requires-python = "==3.13.*"
+readme = "README.md"
+license = {text = "MIT"}
+
+[tool.pdm]
+distribution = false
+
+[tool.pdm.scripts]
+analyse = "python -m scripts.analyse"
