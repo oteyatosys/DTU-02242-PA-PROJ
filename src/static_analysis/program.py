@@ -1,3 +1,4 @@
+from typing import Dict, List
 from static_analysis.method_id import MethodId
 from pathlib import Path
 import glob
@@ -8,11 +9,11 @@ import logging
 l = logging
 
 class Program:
-    def __init__(self, program: dict):
+    def __init__(self, program: Dict[MethodId, List]):
         self._program = program
 
     def lookup(self, method_identifier: MethodId) -> list:
-        return self._program[method_identifier.fully_qualified_signature()]
+        return self._program[method_identifier]
     
     @staticmethod
     def parse_program(path: Path):
@@ -65,7 +66,7 @@ class Program:
                         return_type,
                     )
 
-                    program[method_identifier.fully_qualified_signature()] = bytecode
+                    program[method_identifier] = bytecode
 
         return Program(program)
 
