@@ -7,6 +7,3 @@ from static_analysis.interpreter.arithmetic.interval_arithmetic import IntervalA
 def test_interval_abstraction_add(xs,ys):
   r = IntervalArithmetic.binary('add',Interval.abstract(xs), Interval.abstract(ys))
   assert all(x + y in r for x in xs for y in ys)   
-
-if __name__ == "__main__":
-    test_interval_abstraction_add()

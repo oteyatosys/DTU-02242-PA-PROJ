@@ -2,10 +2,10 @@ from typing import Set
 from hypothesis import given
 from hypothesis.strategies import integers, sets
 
-from static_analysis.interpreter.arithmetic.sign_arithmetic import SignArithmetic
 from static_analysis.interpreter.abstractions.sign_set import SignSet
+from static_analysis.interpreter.arithmetic.sign_arithmetic import SignArithmetic
 
-arithmetic = SignArithmetic
+arithmetic = SignArithmetic()
 
 @given(sets(integers()), sets(integers()))
 def test_sign_adds(xs, ys):
