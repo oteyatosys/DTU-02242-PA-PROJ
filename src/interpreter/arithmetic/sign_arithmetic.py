@@ -1,10 +1,10 @@
-from static_analysis.sign_set import SignSet, Sign
+from interpreter.static.abstractions.sign_set import SignSet, Sign
 from hypothesis import given, assume
 from hypothesis.strategies import sets, integers
 
 BoolSet = set[bool]
 
-class Arithmetic:
+class SignArithmetic:
    
     @staticmethod
     def eq(a: Sign, b: Sign) -> BoolSet:
@@ -42,21 +42,21 @@ class Arithmetic:
 
     @staticmethod
     def le(a: Sign, b: Sign) -> BoolSet:
-        return Arithmetic.lt(a, b) | Arithmetic.eq(a, b)
+        return SignArithmetic.lt(a, b) | SignArithmetic.eq(a, b)
 
     @staticmethod
     def ge(a: Sign, b: Sign) -> BoolSet:
-        return Arithmetic.gt(a, b) | Arithmetic.eq(a, b)
+        return SignArithmetic.gt(a, b) | SignArithmetic.eq(a, b)
 
     @staticmethod
     def compare(opr, a: SignSet, b: SignSet) -> BoolSet:
         operations = {
-            "eq": Arithmetic.eq,
-            "ne": Arithmetic.ne,
-            "lt": Arithmetic.lt,
-            "gt": Arithmetic.gt,
-            "le": Arithmetic.le,
-            "ge": Arithmetic.ge
+            "eq": SignArithmetic.eq,
+            "ne": SignArithmetic.ne,
+            "lt": SignArithmetic.lt,
+            "gt": SignArithmetic.gt,
+            "le": SignArithmetic.le,
+            "ge": SignArithmetic.ge
         }
         if opr in operations:
             func = operations[opr]
@@ -112,10 +112,10 @@ class Arithmetic:
     @staticmethod
     def binary(opr: str, a: SignSet, b: SignSet) -> SignSet:
         operations = {
-            "add": Arithmetic.add,
-            "sub": Arithmetic.sub,
-            "mul": Arithmetic.mul,
-            "div": Arithmetic.div
+            "add": SignArithmetic.add,
+            "sub": SignArithmetic.sub,
+            "mul": SignArithmetic.mul,
+            "div": SignArithmetic.div
         }
         if opr in operations:
             func = operations[opr]
@@ -133,21 +133,21 @@ class Arithmetic:
 def test_sign_add(xs, ys):
   assert (
     SignSet.abstract({x + y for x in xs for y in ys}) 
-      <= Arithmetic.binary("add", SignSet.abstract(xs), SignSet.abstract(ys))
+      <= SignArithmetic.binary("add", SignSet.abstract(xs), SignSet.abstract(ys))
     )
 
 @given(sets(integers()), sets(integers()))
 def test_sign_sub(xs, ys):
     assert (
         SignSet.abstract({x - y for x in xs for y in ys}) 
-            <= Arithmetic.binary("sub", SignSet.abstract(xs), SignSet.abstract(ys))
+            <= SignArithmetic.binary("sub", SignSet.abstract(xs), SignSet.abstract(ys))
         )
 
 @given(sets(integers()), sets(integers()))
 def test_sign_mul(xs, ys):
     assert (
         SignSet.abstract({x * y for x in xs for y in ys}) 
-            <= Arithmetic.binary("mul", SignSet.abstract(xs), SignSet.abstract(ys))
+            <= SignArithmetic.binary("mul", SignSet.abstract(xs), SignSet.abstract(ys))
         )
 
 @given(sets(integers()), sets(integers()))
@@ -155,49 +155,49 @@ def test_sign_div(xs, ys):
     assume(0 not in ys)
     assert (
         SignSet.abstract({x / y for x in xs for y in ys}) 
-            <= Arithmetic.binary("div", SignSet.abstract(xs), SignSet.abstract(ys))
+            <= SignArithmetic.binary("div", SignSet.abstract(xs), SignSet.abstract(ys))
         )
 
 @given(sets(integers()), sets(integers()))
 def test_sign_eq(xs, ys):
     assert (
       {x == y for x in xs for y in ys} 
-        <= Arithmetic.compare("eq", SignSet.abstract(xs), SignSet.abstract(ys))
+        <= SignArithmetic.compare("eq", SignSet.abstract(xs), SignSet.abstract(ys))
     )
 
 @given(sets(integers()), sets(integers()))
 def test_sign_ne(xs, ys):
     assert (
       {x != y for x in xs for y in ys} 
-        <= Arithmetic.compare("ne", SignSet.abstract(xs), SignSet.abstract(ys))
+        <= SignArithmetic.compare("ne", SignSet.abstract(xs), SignSet.abstract(ys))
     )
 
 @given(sets(integers()), sets(integers()))
 def test_sign_lt(xs, ys):
     assert (
       {x < y for x in xs for y in ys} 
-        <= Arithmetic.compare("lt", SignSet.abstract(xs), SignSet.abstract(ys))
+        <= SignArithmetic.compare("lt", SignSet.abstract(xs), SignSet.abstract(ys))
     )
 
 @given(sets(integers()), sets(integers()))
 def test_sign_gt(xs, ys):
     assert (
       {x > y for x in xs for y in ys} 
-        <= Arithmetic.compare("gt", SignSet.abstract(xs), SignSet.abstract(ys))
+        <= SignArithmetic.compare("gt", SignSet.abstract(xs), SignSet.abstract(ys))
     )
 
 @given(sets(integers()), sets(integers()))
 def test_sign_le(xs, ys):
     assert (
       {x <= y for x in xs for y in ys} 
-        <= Arithmetic.compare("le", SignSet.abstract(xs), SignSet.abstract(ys))
+        <= SignArithmetic.compare("le", SignSet.abstract(xs), SignSet.abstract(ys))
     )
 
 @given(sets(integers()), sets(integers()))
 def test_sign_ge(xs, ys):
     assert (
       {x >= y for x in xs for y in ys} 
-        <= Arithmetic.compare("ge", SignSet.abstract(xs), SignSet.abstract(ys))
+        <= SignArithmetic.compare("ge", SignSet.abstract(xs), SignSet.abstract(ys))
     )
 
 test_sign_add()

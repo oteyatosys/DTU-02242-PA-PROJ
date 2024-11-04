@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import Union
-from static_analysis.sign_set import SignSet
+from interpreter.static.abstractions.sign_set import SignSet
 
 AbstractValues = Union[SignSet, str]
 

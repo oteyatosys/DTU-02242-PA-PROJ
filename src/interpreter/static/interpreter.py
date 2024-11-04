@@ -1,6 +1,6 @@
 from dataclasses import dataclass
-from static_analysis.arithmetic import Arithmetic
-from static_analysis.sign_set import SignSet
+from interpreter.arithmetic.sign_arithmetic import SignArithmetic
+from interpreter.static.abstractions.sign_set import SignSet
 from static_analysis.state import State
 
 PC = int
@@ -10,7 +10,7 @@ class Interpreter:
     bytecode : dict
     states : dict[PC, State]
     final : set[str]
-    arithmetic : Arithmetic
+    arithmetic : SignArithmetic
 
     def step(self):
         next_states = self.states.copy()
