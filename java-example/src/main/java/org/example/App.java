@@ -2,6 +2,16 @@ package org.example;
 
 public class App {
 
+    public static final int VERSION = 666;
+
+    public static int add5(int a){
+        return a + 5;
+    }
+
+    public static int convertBytesToBits(int a){
+        return a * 8;
+    }
+
     public static String getGreeting(String greeting, String name){
         return greeting + ", " + name + "!";
     }
