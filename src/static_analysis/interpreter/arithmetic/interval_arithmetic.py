@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from interpreter.static.abstractions.itval import Interval
+from static_analysis.interpreter.abstractions.itval import Interval
 @dataclass
 class IntervalArithmetic:
     @staticmethod

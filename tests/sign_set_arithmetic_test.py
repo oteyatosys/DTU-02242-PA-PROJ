@@ -2,8 +2,8 @@ from typing import Set
 from hypothesis import given
 from hypothesis.strategies import integers, sets
 
-from interpreter.arithmetic.sign_arithmetic import SignArithmetic
-from interpreter.static.abstractions.sign_set import SignSet
+from static_analysis.interpreter.arithmetic.sign_arithmetic import SignArithmetic
+from static_analysis.interpreter.abstractions.sign_set import SignSet
 
 arithmetic = SignArithmetic
 

@@ -2,7 +2,7 @@ from typing import Set
 from hypothesis import given
 from hypothesis.strategies import sets, integers
 
-from interpreter.static.abstractions.sign_set import SignSet
+from static_analysis.interpreter.abstractions.sign_set import SignSet
 
 @given(sets(integers()))
 def test_valid_abstraction(xs: Set[int]):

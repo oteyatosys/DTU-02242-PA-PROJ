@@ -1,6 +1,6 @@
 from hypothesis import given
 from hypothesis.strategies import integers, sets
-from interpreter.static.abstractions.itval import Interval
+from static_analysis.interpreter.abstractions.itval import Interval
 
 @given(sets(integers()))
 def test_interval_abstraction_valid(xs):
