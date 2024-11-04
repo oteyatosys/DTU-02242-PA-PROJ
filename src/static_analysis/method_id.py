@@ -55,7 +55,7 @@ class MethodId:
         return\
             self.class_name == other.class_name\
             and self.method_name == other.method_name\
-            and self.params == other.params
+            and self.params_to_str() == other.params_to_str()
 
     def __eq__(self, other):
         return self.match_signature(other)
