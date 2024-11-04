@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Set, Tuple, TypeAlias, Literal
+from typing import Set, TypeAlias, Literal
 
 Sign : TypeAlias = Literal["+"] | Literal["-"] | Literal["0"]
 
