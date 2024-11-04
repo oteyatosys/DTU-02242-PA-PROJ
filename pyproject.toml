@@ -10,6 +10,8 @@ dependencies = [
     "jmespath>=1.0.1",
     "networkx>=3.4.2",
     "matplotlib>=3.9.2",
+    "tree-sitter>=0.23.2",
+    "tree-sitter-java>=0.23.2",
 ]
 requires-python = "==3.13.*"
 readme = "README.md"
