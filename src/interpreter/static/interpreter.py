@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from interpreter.arithmetic.sign_arithmetic import SignArithmetic
 from interpreter.static.abstractions.sign_set import SignSet
-from static_analysis.state import State
+from interpreter.static.state import State
 
 PC = int
 

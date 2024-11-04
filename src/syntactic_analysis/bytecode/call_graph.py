@@ -78,7 +78,7 @@ def draw_graph(call_graph: CallGraph) -> None:
     plt.show()
 
 if __name__ == "__main__":
-    p = Path("data", "decompiled")
+    p = Path("data", "bytecode")
 
     program: Program = Program.parse_program(p)
     graph = build_call_graph(program)
