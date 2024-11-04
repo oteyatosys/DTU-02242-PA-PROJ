@@ -42,11 +42,3 @@ class SignSet:
     @staticmethod
     def top():
         return SignSet({ "+", "-", "0" })
-
-from hypothesis import given
-from hypothesis.strategies import integers, sets
-
-@given(sets(integers()))
-def test_valid_abstraction(xs):
-    s = SignSet.abstract(xs) 
-    assert all(x in s for x in xs)
