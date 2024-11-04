@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:acb5a5e35d56a9ff75a49d68fa04e186e2c968ae05a3292f95f8d2966545c7c5"
+content_hash = "sha256:ff820d66dbe64b6a29643d1c5b887b237381a35674e5f1b29f5633e9c56c7857"
 
 [[metadata.targets]]
 requires_python = "==3.13.*"
@@ -22,18 +22,6 @@ dependencies = [
 files = [
     {file = "attrs-24.2.0-py3-none-any.whl", hash = "sha256:81921eb96de3191c8258c199618104dd27ac608d9366f5e35d011eae1867ede2"},
     {file = "attrs-24.2.0.tar.gz", hash = "sha256:5cfb1b9148b5b086569baec03f20d7b6bf3bcacc9a42bebf87ffaaca362f6346"},
-]
-
-[[package]]
-name = "colorama"
-version = "0.4.6"
-requires_python = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,!=3.6.*,>=2.7"
-summary = "Cross-platform colored terminal text."
-groups = ["dev"]
-marker = "sys_platform == \"win32\""
-files = [
-    {file = "colorama-0.4.6-py2.py3-none-any.whl", hash = "sha256:4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6"},
-    {file = "colorama-0.4.6.tar.gz", hash = "sha256:08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44"},
 ]
 
 [[package]]
@@ -97,7 +85,7 @@ files = [
 
 [[package]]
 name = "hypothesis"
-version = "6.115.5"
+version = "6.116.0"
 requires_python = ">=3.9"
 summary = "A library for property-based testing"
 groups = ["default"]
@@ -107,19 +95,8 @@ dependencies = [
     "sortedcontainers<3.0.0,>=2.1.0",
 ]
 files = [
-    {file = "hypothesis-6.115.5-py3-none-any.whl", hash = "sha256:b7733459ae9a93020fac3b91b41473c9b85e975139a152a70d88f3a5caa3fa3f"},
-    {file = "hypothesis-6.115.5.tar.gz", hash = "sha256:4768c5fb426b305462ed31032d6e216a31daaefb1dc3134fdf2795b7961d7cb3"},
-]
-
-[[package]]
-name = "iniconfig"
-version = "2.0.0"
-requires_python = ">=3.7"
-summary = "brain-dead simple config-ini parsing"
-groups = ["dev"]
-files = [
-    {file = "iniconfig-2.0.0-py3-none-any.whl", hash = "sha256:b6a85871a79d2e3b22d2d1b94ac2824226a63c6b741c88f7ae975f18b6778374"},
-    {file = "iniconfig-2.0.0.tar.gz", hash = "sha256:2d91e135bf72d31a410b17c16da610a82cb55f6b0477d1a902134b24a455b8b3"},
+    {file = "hypothesis-6.116.0-py3-none-any.whl", hash = "sha256:d30271214eae0d4758b72b408e9777405c7c7f687e14e8a42853adea887b2891"},
+    {file = "hypothesis-6.116.0.tar.gz", hash = "sha256:9c1ac9a2edb77aacae1950d8ded6b3f40dbf8483097c88336265c348d2132c71"},
 ]
 
 [[package]]
@@ -238,7 +215,7 @@ name = "packaging"
 version = "24.1"
 requires_python = ">=3.8"
 summary = "Core utilities for Python packages"
-groups = ["default", "dev"]
+groups = ["default"]
 files = [
     {file = "packaging-24.1-py3-none-any.whl", hash = "sha256:5b8f2217dbdbd2f7f384c41c628544e6d52f2d0f53c6d0c3ea61aa5d1d7ff124"},
     {file = "packaging-24.1.tar.gz", hash = "sha256:026ed72c8ed3fcce5bf8950572258698927fd1dbda10a5e981cdf0ac37f4f002"},
@@ -274,17 +251,6 @@ files = [
 ]
 
 [[package]]
-name = "pluggy"
-version = "1.5.0"
-requires_python = ">=3.8"
-summary = "plugin and hook calling mechanisms for python"
-groups = ["dev"]
-files = [
-    {file = "pluggy-1.5.0-py3-none-any.whl", hash = "sha256:44e1ad92c8ca002de6377e165f3e0f1be63266ab4d554740532335b9d75ea669"},
-    {file = "pluggy-1.5.0.tar.gz", hash = "sha256:2cffa88e94fdc978c4c574f15f9e59b7f4201d439195c3715ca9e2486f1d0cf1"},
-]
-
-[[package]]
 name = "pyparsing"
 version = "3.2.0"
 requires_python = ">=3.9"
@@ -293,25 +259,6 @@ groups = ["default"]
 files = [
     {file = "pyparsing-3.2.0-py3-none-any.whl", hash = "sha256:93d9577b88da0bbea8cc8334ee8b918ed014968fd2ec383e868fb8afb1ccef84"},
     {file = "pyparsing-3.2.0.tar.gz", hash = "sha256:cbf74e27246d595d9a74b186b810f6fbb86726dbf3b9532efb343f6d7294fe9c"},
-]
-
-[[package]]
-name = "pytest"
-version = "8.3.3"
-requires_python = ">=3.8"
-summary = "pytest: simple powerful testing with Python"
-groups = ["dev"]
-dependencies = [
-    "colorama; sys_platform == \"win32\"",
-    "exceptiongroup>=1.0.0rc8; python_version < \"3.11\"",
-    "iniconfig",
-    "packaging",
-    "pluggy<2,>=1.5",
-    "tomli>=1; python_version < \"3.11\"",
-]
-files = [
-    {file = "pytest-8.3.3-py3-none-any.whl", hash = "sha256:a6853c7375b2663155079443d2e45de913a911a11d669df02a50814944db57b2"},
-    {file = "pytest-8.3.3.tar.gz", hash = "sha256:70b98107bd648308a7952b06e6ca9a50bc660be218d53c257cc1fc94fda10181"},
 ]
 
 [[package]]
@@ -347,4 +294,39 @@ groups = ["default"]
 files = [
     {file = "sortedcontainers-2.4.0-py2.py3-none-any.whl", hash = "sha256:a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0"},
     {file = "sortedcontainers-2.4.0.tar.gz", hash = "sha256:25caa5a06cc30b6b83d11423433f65d1f9d76c4c6a0c90e3379eaa43b9bfdb88"},
+]
+
+[[package]]
+name = "tree-sitter"
+version = "0.23.2"
+requires_python = ">=3.9"
+summary = "Python bindings to the Tree-sitter parsing library"
+groups = ["default"]
+files = [
+    {file = "tree-sitter-0.23.2.tar.gz", hash = "sha256:66bae8dd47f1fed7bdef816115146d3a41c39b5c482d7bad36d9ba1def088450"},
+    {file = "tree_sitter-0.23.2-cp313-cp313-macosx_10_13_x86_64.whl", hash = "sha256:eff630dddee7ba05accb439b17e559e15ce13f057297007c246237ceb6306332"},
+    {file = "tree_sitter-0.23.2-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:4780ba8f3894f2dea869fad2995c2aceab3fd5ab9e6a27c45475d2acd7f7e84e"},
+    {file = "tree_sitter-0.23.2-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:f0b609460b8e3e256361fb12e94fae5b728cb835b16f0f9d590b5aadbf9d109b"},
+    {file = "tree_sitter-0.23.2-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:78d070d8eaeaeb36cf535f55e5578fddbfc3bf53c1980f58bf1a99d57466b3b5"},
+    {file = "tree_sitter-0.23.2-cp313-cp313-musllinux_1_2_aarch64.whl", hash = "sha256:878580b2ad5054c410ba3418edca4d34c81cc26706114d8f5b5541688bc2d785"},
+    {file = "tree_sitter-0.23.2-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:29224bdc2a3b9af535b7725e249d3ee291b2e90708e82832e73acc175e40dc48"},
+    {file = "tree_sitter-0.23.2-cp313-cp313-win_amd64.whl", hash = "sha256:c58d89348162fbc3aea1fe6511a66ee189fc0e4e4bbe937026f29e4ecef17763"},
+    {file = "tree_sitter-0.23.2-cp313-cp313-win_arm64.whl", hash = "sha256:0ff2037be5edab7801de3f6a721b9cf010853f612e2008ee454e0e0badb225a6"},
+]
+
+[[package]]
+name = "tree-sitter-java"
+version = "0.23.2"
+requires_python = ">=3.9"
+summary = "Java grammar for tree-sitter"
+groups = ["default"]
+files = [
+    {file = "tree_sitter_java-0.23.2-cp38-abi3-macosx_10_9_x86_64.whl", hash = "sha256:43e3582b735a496f1fc014d775588a4b3ed62105e61e499db04684a39e4a0a20"},
+    {file = "tree_sitter_java-0.23.2-cp38-abi3-macosx_11_0_arm64.whl", hash = "sha256:18c4d3cd04831cabc75973345eeba25f40e3cd34a7715f694a007493c86b14c3"},
+    {file = "tree_sitter_java-0.23.2-cp38-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:bb0bf0c5105d3cccb59c0ca2fe91362393f671e1090a352d901e6ced2e99cd4b"},
+    {file = "tree_sitter_java-0.23.2-cp38-abi3-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:b5437d8d65ea6b0a475426cc391ce8e642ed7198d22953be7c0e142b6a43c9ec"},
+    {file = "tree_sitter_java-0.23.2-cp38-abi3-musllinux_1_2_aarch64.whl", hash = "sha256:0e0cb669e23da890a02daa03d0f5deba890cd6613b4ea34473d174c7b002b8df"},
+    {file = "tree_sitter_java-0.23.2-cp38-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:00c56dc90e2258dda7c1ed13c96c16553576106460dffb135ca6fd82f51175d0"},
+    {file = "tree_sitter_java-0.23.2-cp38-abi3-win_amd64.whl", hash = "sha256:949705d38ed496f14dd66bf76f2ec6fdd21387d011849c36c79477b4fabd46dd"},
+    {file = "tree_sitter_java-0.23.2.tar.gz", hash = "sha256:f9969e75c79e5ab449ef5e2f9ae666b04a9266ba4d5d3127a0c1303926549406"},
 ]
