@@ -1,5 +1,7 @@
+from typing import Generator, Tuple
 from reader.file import File
 from pathlib import Path
+from reader.method import Method
 from reader.method_signature import MethodSignature
 
 class Program:
@@ -27,7 +29,7 @@ class Program:
             self.test_files[file.name] = file
         return self
 
-    def all_methods(self):
+    def all_methods(self) -> Generator[Tuple[File, Method], None, None]:
         for file in self.files.values():
             for method in file.methods.values():
                 yield file, method
