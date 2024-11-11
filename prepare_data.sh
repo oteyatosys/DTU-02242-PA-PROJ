@@ -31,6 +31,9 @@ mvn -q -f java-example/pom.xml clean package
 # Copy the java-example class files to ./data/new/classes
 cp -r java-example/target/classes/ $new_dir/classes/
 
+# Copy the java-example class files to ./data/new/classes
+cp -r java-example/target/test-classes/ $new_dir/test-classes/
+
 # Copy the java-example source files to ./data/new/source
 cp -r java-example/src/main/java/ $new_dir/source/
 
@@ -43,6 +46,21 @@ for file in $(find $new_dir/classes -name "*.class"); do
 
     # Make sure the target folder exists
     mkdir -p $(dirname ${file/classes/bytecode})
+
+    # Convert the class to bytecode
+    eval "$JVM2JSON_PATH < \"$file\" | $PRETTY_PRINT_CMD > \"$out_file\""
+done
+
+
+# Convert all test classes to test bytecode
+for file in $(find $new_dir/test-classes -name "*.class"); do
+
+    # Set the output file path
+    out_file=${file/test-classes/test-bytecode}
+    out_file=${out_file%.class}.json
+
+    # Make sure the target folder exists
+    mkdir -p $(dirname ${file/test-classes/test-bytecode})
 
     # Convert the class to bytecode
     eval "$JVM2JSON_PATH < \"$file\" | $PRETTY_PRINT_CMD > \"$out_file\""
