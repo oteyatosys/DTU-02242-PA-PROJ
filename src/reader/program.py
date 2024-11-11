@@ -1,5 +1,6 @@
 from reader.file import File
 from pathlib import Path
+from reader.method_signature import MethodSignature
 
 class Program:
     def __init__(self, files: dict[str, File] = {}, test_files: dict[str, File] = {}):
@@ -25,3 +26,11 @@ class Program:
             file = File.from_path(source_file, bytecode_file)
             self.test_files[file.name] = file
         return self
+
+    def all_methods(self):
+        for file in self.files.values():
+            for method in file.methods.values():
+                yield file, method
+
+    def method(self, signature: MethodSignature):
+        return self.files[signature.class_name].methods[signature]

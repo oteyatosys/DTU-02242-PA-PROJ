@@ -1,5 +1,22 @@
-class Method
+from reader.method_signature import MethodSignature
 
-    def __init__(self, json) -> None:
+class Method:
+
+    def __init__(self, class_name, json) -> None:
+        self.class_name = class_name
+        self.json = json
         self.name = json['name']
-        pass
+        self.bytecode = json['code']['bytecode']
+
+        returns = Method.type_to_str(json.returns)
+        params = (Method.type_to_str(param) for param in json["params"])
+        self.signature = MethodSignature(self.class_name, self.name, returns, params)
+
+    @staticmethod
+    def type_to_str(json):
+        if "kind" in json['type'] and json['type']['kind'] == "class":
+            return json['type']['name']
+        elif "base" in json['type']:
+            return json['type']['base']
+        else:
+            raise NotImplementedError(f"can't handle {json!r}")
