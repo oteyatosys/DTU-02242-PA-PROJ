@@ -12,10 +12,11 @@ from reader.program import Program
 from syntactic_analysis.scanner import get_int_literals
 
 def load_program() -> Program:
-    bytecode_dir = project_root / "data" / "bytecode"
-    source_dir = project_root / "data" / "source"
-    test_source_dir = project_root / "data" / "test_source"
-    test_bytecode_dir = project_root / "data" / "test_bytecode"
+    new_dir = project_root / "data" / "new"
+    bytecode_dir = new_dir / "bytecode"
+    source_dir = new_dir / "source"
+    test_source_dir = new_dir / "test_source"
+    test_bytecode_dir = new_dir / "test_bytecode"
 
     return Program() \
         .scan(source_dir, bytecode_dir) \
@@ -25,8 +26,15 @@ def prepare_data():
     subprocess.run([str(project_root / "prepare_data.sh")])
 
 if __name__ == "__main__":
-    prepare_data()
+    program = load_program()
 
+    print("All methods in the program:")
+    print(program.all_methods())
+    for file, method in program.all_methods():
+        print("method")
+        print(file.name)
+        print(method.name)
+        print(method.signature)
 
     # program = load_program()
 

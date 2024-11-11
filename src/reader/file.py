@@ -24,6 +24,6 @@ class File:
     def scan_methods(self):
         for method_json in self.bytecode["methods"]:
             method = Method(self.name, method_json)
-            signature = method.signature()
+            signature = method.signature
             self.methods[signature] = method
 

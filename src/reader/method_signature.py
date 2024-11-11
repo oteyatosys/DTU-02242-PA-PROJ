@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-@dataclass(Frozen=True)
+@dataclass(frozen=True)
 class MethodSignature:
     class_name: str
     name: str
