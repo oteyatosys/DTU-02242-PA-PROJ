@@ -23,13 +23,6 @@ class AbstractInterpreter:
     seen: Set[AbstractState] = field(default_factory=set)
     generated: int = 0
 
-    def interpret(self):
-        timeout: int = 10000
-        for i in range(timeout):
-            self.step()
-            
-        print(f"Generated {self.generated} states")
-
     def analyse(self, initial: Tuple[PC, AbstractState]):
         states: Dict[PC, AbstractState] = {initial[0]: initial[1]}
         needs_work: List[int] = [initial[0]]
