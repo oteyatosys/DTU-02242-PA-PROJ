@@ -3,6 +3,9 @@
 # Change directory to the directory of the script
 cd "$(dirname "$0")"
 
+new_dir="data/new"
+old_dir="data/old"
+
 # Set the path to the jvm2json command (if vbariable is not set already)
 if [ -z "$JVM2JSON_PATH" ]; then
     # JVM2JSON_PATH="docker run --platform linux/amd64 --rm -i kalhauge/jvm2json:latest jvm2json"
@@ -15,20 +18,24 @@ if [ -z "$PRETTY_PRINT_CMD" ]; then
 fi
 
 # Prepare the data directory
-rm -rf ./data
-mkdir -p ./data
+rm -rf $old_dir
+mkdir -p $new_dir
+
+# Move all contents of new_dir to old_dir
+mv $new_dir $old_dir
+mkdir -p $new_dir
 
 # Clean and build the java-example
 mvn -q -f java-example/pom.xml clean package
 
-# Copy the java-example class files to ./data/classes
-cp -r java-example/target/classes/ data/classes/
+# Copy the java-example class files to ./data/new/classes
+cp -r java-example/target/classes/ $new_dir/classes/
 
-# Copy the java-example source files to ./data/source
-cp -r java-example/src/main/java/ data/source/
+# Copy the java-example source files to ./data/new/source
+cp -r java-example/src/main/java/ $new_dir/source/
 
 # Convert all classes to bytecode
-for file in $(find data/classes -name "*.class"); do
+for file in $(find $new_dir/classes -name "*.class"); do
 
     # Set the output file path
     out_file=${file/classes/bytecode}
