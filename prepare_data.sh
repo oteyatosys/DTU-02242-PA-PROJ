@@ -37,6 +37,9 @@ cp -r java-example/target/test-classes/ $new_dir/test-classes/
 # Copy the java-example source files to ./data/new/source
 cp -r java-example/src/main/java/ $new_dir/source/
 
+# Copy the java-example source files to ./data/new/test-source
+cp -r java-example/src/test/java/ $new_dir/test-source/
+
 # Convert all classes to bytecode
 for file in $(find $new_dir/classes -name "*.class"); do
 
