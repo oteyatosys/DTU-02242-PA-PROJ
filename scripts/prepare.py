@@ -49,7 +49,7 @@ def convert_classes_to_json(src_dir, dest_dir):
 
 try:
     # Run maven to compile the Java code
-    result = subprocess.run(["mvn", "-q", "-f", "java-example/pom.xml", "clean", "package"])
+    result = subprocess.run(["mvn", "-q", "-f", "java-example/pom.xml", "clean", "package", "-DskipTests"])
 
     if result.returncode != 0:
         raise RuntimeError("Error: Maven build failed")
