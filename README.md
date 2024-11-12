@@ -22,7 +22,5 @@
 
 # Running
 
-Run the script `run.sh` to build the java-example and decompile files.
-The output can be found in the `data` folder.
-
+To generate files needed for analysis, run `pdm run prepare`.
 Once files are generated you can call the command `pdm run analyse`.
