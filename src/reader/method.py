@@ -10,6 +10,6 @@ class Method:
         self.signature = MethodSignature.from_class_method(
             self.class_name, 
             self.name, 
-            json["returns"], 
+            json["returns"],
             json["params"]
         )
