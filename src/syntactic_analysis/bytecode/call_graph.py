@@ -1,26 +1,28 @@
 from dataclasses import Field, dataclass, field
 from pathlib import Path
 from typing import Dict, List, Set, Tuple
-from static_analysis.program import Program, MethodId
 import networkx as nx
 import matplotlib.pyplot as plt
 
+from reader.method_signature import MethodSignature
+from reader.program import Program
+
 @dataclass
 class CallGraph:
-    nodes: Set[MethodId] = field(default_factory=set)
-    graph: Dict[MethodId, Set[MethodId]] = field(default_factory=dict)
+    nodes: Set[MethodSignature] = field(default_factory=set)
+    graph: Dict[MethodSignature, Set[MethodSignature]] = field(default_factory=dict)
 
-    def add_nodes_from(self, nodes: Set[MethodId]) -> None:
+    def add_nodes_from(self, nodes: Set[MethodSignature]) -> None:
         for node in nodes:
             self.add_node(node)
 
-    def add_node(self, method_id: MethodId) -> None:
+    def add_node(self, method_id: MethodSignature) -> None:
         if method_id in self.nodes:
             return
         self.nodes.add(method_id)
         self.graph[method_id] = set()
 
-    def add_edge(self, callsite: MethodId, callee: MethodId) -> None:
+    def add_edge(self, callsite: MethodSignature, callee: MethodSignature) -> None:
         if not callsite in self.nodes:
             self.add_node(callsite)
 
@@ -29,12 +31,17 @@ class CallGraph:
 
         self.graph[callsite].add(callee)
 
-def extract_methods_and_calls(program: Program) -> Tuple[Set[MethodId], Dict[MethodId, List[MethodId]]]:
-    methods: Set[MethodId] = set(program._program.keys())
-    calls: Dict[MethodId, List[MethodId]] = {}
 
-    for method_id, bytecode in program._program.items():
-        calls[method_id] = []
+def extract_methods_and_calls(program: Program) -> Tuple[Set[MethodSignature], Dict[MethodSignature, List[MethodSignature]]]:
+    method_signatures: Set[MethodSignature] = set()
+    calls: Dict[MethodSignature, List[MethodSignature]] = {}
+
+    for file, method in program.all_methods():
+        method_signature = method.signature
+        method_signatures.add(method_signature)
+        bytecode = method.bytecode
+
+        calls[method_signature] = []
 
         if not bytecode:
             continue
@@ -44,16 +51,17 @@ def extract_methods_and_calls(program: Program) -> Tuple[Set[MethodId], Dict[Met
                 if instruction["access"] != "static":
                     continue
 
-                callee = MethodId.from_bytecode_invocation(instruction)
-                calls[method_id].append(callee)
+                callee = MethodSignature.from_bytecode(instruction["method"])
+                calls[method_signature].append(callee)
 
-    return methods, calls
+    return method_signatures, calls
+
 
 def build_call_graph(program: Program) -> CallGraph:
     methods, calls = extract_methods_and_calls(program)
     call_graph = CallGraph()
 
-    call_graph.add_nodes_from(methods)
+    # call_graph.add_nodes_from(methods)
 
     for callsite, callees in calls.items():
         for callee in callees:
@@ -66,20 +74,14 @@ def build_call_graph(program: Program) -> CallGraph:
 
     return call_graph
 
+
 def draw_graph(call_graph: CallGraph) -> None:
     G = nx.DiGraph()
-    G.add_nodes_from([node.fully_qualified_signature() for node in call_graph.nodes])
+    G.add_nodes_from([node for node in call_graph.nodes])
 
     for caller, callees in call_graph.graph.items():
         for callee in callees:
-            G.add_edge(caller.fully_qualified_signature(), callee.fully_qualified_signature())
+            G.add_edge(caller, callee)
     
     nx.draw(G, with_labels=True)
     plt.show()
-
-if __name__ == "__main__":
-    p = Path("data", "bytecode")
-
-    program: Program = Program.parse_program(p)
-    graph = build_call_graph(program)
-    draw_graph(graph)

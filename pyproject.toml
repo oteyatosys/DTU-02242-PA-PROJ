@@ -21,7 +21,9 @@ license = {text = "MIT"}
 distribution = false
 
 [tool.pdm.scripts]
+prepare = "python -m scripts.prepare"
 analyse = "python -m scripts.analyse"
+interpret = "python -m scripts.interpret"
 
 [tool.pytest.ini_options]
 pythonpath = [

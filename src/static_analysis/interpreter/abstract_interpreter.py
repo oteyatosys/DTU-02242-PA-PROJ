@@ -1,6 +1,6 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Set, Tuple
+from typing import Dict, List, Tuple
 
 import sys
 
@@ -20,15 +20,7 @@ class AbstractInterpreter:
     bytecode : dict[int, list]
     final : set[str]
     arithmetic : Arithmetic
-    seen: Set[AbstractState] = field(default_factory=set)
     generated: int = 0
-
-    def interpret(self):
-        timeout: int = 10000
-        for i in range(timeout):
-            self.step()
-            
-        print(f"Generated {self.generated} states")
 
     def analyse(self, initial: Tuple[PC, AbstractState]):
         states: Dict[PC, AbstractState] = {initial[0]: initial[1]}
@@ -49,6 +41,7 @@ class AbstractInterpreter:
                     print(f"New state at {pc}")
 
         print(f"Generated {self.generated} states")
+        print(f"Final states: {sorted(states.keys())}")
 
 
     def step(self, pc: int, astate: AbstractState):
@@ -117,7 +110,9 @@ class AbstractInterpreter:
 
         if access == "special":
             # Just pass, as method invocation on objects is not supported
-
+            yield (pc + 1, astate)
+        elif access == "static":
+            # TODO: Implement static method invocation
             yield (pc + 1, astate)
         else:
             raise NotImplemented(f"can't handle {bc!r}")
