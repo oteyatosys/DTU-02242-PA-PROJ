@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Tuple
 
@@ -18,9 +18,10 @@ PC = int
 @dataclass
 class AbstractInterpreter:
     bytecode : dict[int, list]
-    final : set[str]
     arithmetic : Arithmetic
     generated: int = 0
+    final : set[str] = field(default_factory=set)
+    pcs : set[int] = field(default_factory=set)
 
     def analyse(self, initial: Tuple[PC, AbstractState]):
         states: Dict[PC, AbstractState] = {initial[0]: initial[1]}
@@ -41,6 +42,7 @@ class AbstractInterpreter:
                     print(f"New state at {pc}")
 
         print(f"Generated {self.generated} states")
+        self.pcs.update(states.keys())
         print(f"Final states: {sorted(states.keys())}")
 
 
