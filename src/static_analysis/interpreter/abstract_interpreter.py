@@ -133,11 +133,20 @@ class AbstractInterpreter:
 
     def step_push(self, b: list, pc: int, astate: AbstractState):
         new_state = astate.copy()
+        type = b["value"]["type"]
+        value = b["value"]["value"]
 
-        new_state.stack.append(
-            SignSet.abstract({b["value"]["value"]})
-        )
-
+        if type == "integer":
+            new_state.stack.append(
+                SignSet.abstract({value})
+            )
+        elif type == "boolean":
+            new_state.stack.append(
+                BoolSet.abstract({value})
+            )
+        else:
+            new_state.stack.append(value)
+        
         yield (pc + 1, new_state)
 
     def step_return(self, b: list, pc: int, astate: AbstractState):
