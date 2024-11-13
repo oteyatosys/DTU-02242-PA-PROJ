@@ -33,5 +33,14 @@ class Program:
             for method in file.methods.values():
                 yield file, method
 
+    # Looks up a method by its signature by first checking the main files and then the test files
+    # Raises KeyError if the method is not found
     def method(self, signature: MethodSignature):
         return self.files[signature.class_name].methods[signature]
+        if signature.class_name in self.files:
+            return self.files[signature.class_name].methods[signature]
+        elif signature.class_name in self.test_files:
+            return self.test_files[signature.class_name].methods[signature]
+        else:
+            raise KeyError(f"Method {signature} not found in program")
+        
