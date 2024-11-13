@@ -17,8 +17,8 @@ class MethodSignature:
         return MethodSignature(
             class_name,
             method_name,
-            MethodSignature.type_str(returns["type"]),
-            tuple(MethodSignature.type_str(param["type"]) for param in params),
+            MethodSignature.type_str(returns),
+            tuple(MethodSignature.type_str(param) for param in params),
         )
 
     @staticmethod
@@ -31,15 +31,18 @@ class MethodSignature:
         return MethodSignature(
             class_name,
             method_name,
-            MethodSignature.type_str(returns["type"]),
-            tuple(MethodSignature.type_str(param["type"]) for param in params),
+            MethodSignature.type_str(returns),
+            tuple(MethodSignature.type_str(param) for param in params),
         )
 
     @staticmethod
-    def type_str(type_json):
-        if type_json == None:
+    def type_str(json):
+        print(f"json: {json!r}")
+        if json == None or "type" not in json or json["type"] == None:
             return "void"
         
+        type_json = json["type"]
+
         if "base" in type_json:
             return type_json["base"]
         
