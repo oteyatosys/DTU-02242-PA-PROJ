@@ -7,6 +7,7 @@ import sys
 from static_analysis.interpreter.abstractions.abstract_state import AbstractState
 from static_analysis.interpreter.abstractions.bool_set import BoolSet
 from static_analysis.interpreter.abstractions.sign_set import SignSet
+from static_analysis.interpreter.abstractions.bot import Bot
 from static_analysis.interpreter.arithmetic.arithmetic import Arithmetic
 from static_analysis.interpreter.arithmetic.sign_arithmetic import SignArithmetic
 from static_analysis.method_id import MethodId
@@ -33,7 +34,7 @@ class AbstractInterpreter:
             for pc, astate in self.step(curr_idx, states[curr_idx]):
                 self.generated += 1
 
-                old = states.get(pc, AbstractState.bot())
+                old = states.get(pc, Bot())
                 
                 states[pc] = old | astate
 
