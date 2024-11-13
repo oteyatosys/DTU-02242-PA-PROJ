@@ -1,4 +1,4 @@
-from typing import Generator, Tuple
+from typing import Iterable, Tuple
 from reader.file import File
 from pathlib import Path
 from reader.method import Method
@@ -24,13 +24,13 @@ class Program:
         return program
 
     # Returns a generator of all methods in the program
-    def all_methods(self) -> Generator[Tuple[File, Method], None, None]:
+    def all_methods(self) -> Iterable[Tuple[File, Method]]:
         for file in self.files.values():
             for method in file.methods.values():
                 yield file, method
 
     # Returns a generator of all test methods in the program
-    def all_test_methods(self):
+    def all_test_methods(self) -> Iterable[Tuple[File, Method]]:
         for file in self.test_files.values():
             for method in file.methods.values():
                 if method.is_test():
