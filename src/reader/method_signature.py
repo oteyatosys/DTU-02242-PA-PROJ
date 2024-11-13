@@ -31,14 +31,24 @@ class MethodSignature:
         return MethodSignature(
             class_name,
             method_name,
-            MethodSignature.type_str(returns) if "kind" in returns 
-                else returns,
-            tuple(
-                MethodSignature.type_str(param) if "kind" in param
-                else param
-                for param in params
-            ),
+            MethodSignature.invocation_type_str(returns),
+            tuple(MethodSignature.invocation_type_str(param) for param in params),
         )
+
+
+    @staticmethod
+    def invocation_type_str(json):
+        if json is None:
+            return "void"
+        
+        if "kind" in json:
+            return MethodSignature.type_str(json)
+        
+        if isinstance(json, str):
+            return json
+        
+        raise NotImplementedError(f"Type {json!r} not implemented")
+
 
     @staticmethod
     def type_str(json):
