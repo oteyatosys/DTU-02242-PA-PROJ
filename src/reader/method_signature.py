@@ -31,16 +31,24 @@ class MethodSignature:
         return MethodSignature(
             class_name,
             method_name,
-            MethodSignature.type_str(returns),
-            tuple(MethodSignature.type_str(param) for param in params),
+            MethodSignature.type_str(returns) if "kind" in returns 
+                else returns,
+            tuple(
+                MethodSignature.type_str(param) if "kind" in param
+                else param
+                for param in params
+            ),
         )
 
     @staticmethod
     def type_str(json):
-        if json == None or "type" not in json or json["type"] == None:
+        if json == None or "type" in json and json["type"] == None:
             return "void"
         
-        type_json = json["type"]
+        if "type" in json:
+            type_json = json["type"]
+        else:
+            type_json = json
 
         if "base" in type_json:
             return type_json["base"]
