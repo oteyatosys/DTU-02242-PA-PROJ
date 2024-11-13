@@ -37,7 +37,6 @@ class MethodSignature:
 
     @staticmethod
     def type_str(json):
-        print(f"json: {json!r}")
         if json == None or "type" not in json or json["type"] == None:
             return "void"
         
