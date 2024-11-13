@@ -23,20 +23,22 @@ class Program:
         Program.scan_files(program.test_files, data_dir / "test-source", data_dir / "test-bytecode")
         return program
 
+    # Returns a generator of all methods in the program
     def all_methods(self) -> Generator[Tuple[File, Method], None, None]:
         for file in self.files.values():
             for method in file.methods.values():
                 yield file, method
 
+    # Returns a generator of all test methods in the program
     def all_test_methods(self):
         for file in self.test_files.values():
             for method in file.methods.values():
-                yield file, method
+                if method.is_test():
+                    yield file, method
 
     # Looks up a method by its signature by first checking the main files and then the test files
     # Raises KeyError if the method is not found
     def method(self, signature: MethodSignature):
-        return self.files[signature.class_name].methods[signature]
         if signature.class_name in self.files:
             return self.files[signature.class_name].methods[signature]
         elif signature.class_name in self.test_files:

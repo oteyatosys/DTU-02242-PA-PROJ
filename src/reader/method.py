@@ -1,4 +1,5 @@
 from reader.method_signature import MethodSignature
+import jmespath
 
 class Method:
 
@@ -13,3 +14,7 @@ class Method:
             json["returns"],
             json["params"]
         )
+
+    # Returns true if the method has an annotation class that ends with 'Test'
+    def is_test(self):
+        return bool(jmespath.search("annotations[?ends_with(type, 'Test')]", self.json))
