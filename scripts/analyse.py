@@ -2,28 +2,33 @@
 
 from pathlib import Path
 import sys
-import subprocess
+
+from prediction.call_graph_predictor import CallGraphPredictor
+from prediction.predictor import TestPredictor
 
 # Add src to path
 project_root = Path(__file__).parent.parent
 sys.path.append(str(project_root / "src"))
 
+from typing import Set
+from reader.method_signature import MethodSignature
 from reader.program import Program
-from syntactic_analysis.scanner import get_int_literals
+from syntactic_analysis.bytecode.call_graph import build_call_graph
+import jsondiff
 
-def prepare_data():
-    subprocess.run([str(project_root / "prepare_data.sh")])
+
+data_dir: Path = project_root / "data"
+
+new_dir = data_dir / "new"
+old_dir = data_dir / "old"
 
 if __name__ == "__main__":
-    program = Program.load(project_root / "data" / "new")
+    new_program = Program.load(new_dir)
+    old_program = Program.load(old_dir)
 
-    print("All methods in the program:")
-    print(program.all_methods())
-    for file, method in program.all_methods():
-        print("method")
-        print(file.name)
-        print(method.name)
-        print(method.signature)
+    predictor: TestPredictor = CallGraphPredictor(old_program, new_program)
+
+    test: Set[MethodSignature] = predictor.predict()
 
     # ints = get_int_literals(program)
 
