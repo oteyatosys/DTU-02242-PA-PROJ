@@ -32,6 +32,30 @@ class CallGraph:
 
         self.edges[callsite].add(callee)
 
+    def bfs_walk(self, start_node: MethodSignature, visit: callable) -> None:
+        from collections import deque
+
+        queue = deque([start_node])
+        visited = set()
+
+        while queue:
+            node = queue.popleft()
+            if node in visited:
+                continue
+
+            visited.add(node)
+            should_continue = visit(start_node, node)
+
+            if not should_continue:
+                continue
+
+            for neighbor in self.edges.get(node, []):
+                if neighbor not in visited:
+                    queue.append(neighbor)
+
+    def __contains__(self, method_id: MethodSignature) -> bool:
+        return method_id in self.nodes
+
 
 def extract_methods_and_calls(program: Program) -> Tuple[Set[MethodSignature], Dict[MethodSignature, List[MethodSignature]]]:
     method_signatures: Set[MethodSignature] = set()
