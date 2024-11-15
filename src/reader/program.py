@@ -1,13 +1,14 @@
+from dataclasses import dataclass, field
 from typing import Iterable, Tuple
 from reader.file import File
 from pathlib import Path
 from reader.method import Method
 from reader.method_signature import MethodSignature
 
+@dataclass
 class Program:
-    def __init__(self, files: dict[str, File] = {}, test_files: dict[str, File] = {}):
-        self.files = files
-        self.test_files = test_files
+    files: dict[str, File] = field(default_factory=dict)
+    test_files: dict[str, File] = field(default_factory=dict)
 
     @staticmethod
     def scan_files(target: dict[str, File], source_root_path: Path, bytecode_root_path: Path):
@@ -17,7 +18,7 @@ class Program:
             target[file.name] = file
 
     @staticmethod
-    def load(data_dir: Path):
+    def load(data_dir: Path) -> 'Program':
         program = Program()
         Program.scan_files(program.files,      data_dir / "source",      data_dir / "bytecode")
         Program.scan_files(program.test_files, data_dir / "test-source", data_dir / "test-bytecode")
@@ -38,11 +39,18 @@ class Program:
 
     # Looks up a method by its signature by first checking the main files and then the test files
     # Raises KeyError if the method is not found
-    def method(self, signature: MethodSignature):
+    def method(self, signature: MethodSignature) -> Method:
         if signature.class_name in self.files:
             return self.files[signature.class_name].methods[signature]
         elif signature.class_name in self.test_files:
             return self.test_files[signature.class_name].methods[signature]
         else:
             raise KeyError(f"Method {signature} not found in program")
-        
+    
+
+    def contains_method(self, signature: MethodSignature) -> bool:
+        try:
+            self.method(signature)
+            return True
+        except KeyError:
+            return False
