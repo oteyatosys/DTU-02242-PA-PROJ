@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
 from pathlib import Path
-from preparation.prepare import perform_rotation
+from preparation.prepare import perform_data_rotation
 
 def main():
-    perform_rotation(
+    perform_data_rotation(
         Path("java-example")
     )
 
