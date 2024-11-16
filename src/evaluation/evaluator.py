@@ -11,6 +11,7 @@ from preparation.prepare import perform_data_rotation, reset_data
 from reader.method_signature import MethodSignature
 from reader.program import Program
 import logging as l
+from timeit import default_timer as timer, timeit
 
 l.basicConfig(level=l.INFO)
 
@@ -63,6 +64,9 @@ class Evaluator:
         src_dir = maven_project / "src/main/java"
 
         stage.apply_changes(src_dir)
+        
+        start_time = timer()
+
         perform_data_rotation(maven_project)
 
         ground_truth = stage.ground_truth
@@ -72,10 +76,13 @@ class Evaluator:
         
         predicted = predictor.predict(old_program, new_program)
 
+        end_time = timer()
+
         stage.revert_changes(src_dir)
 
         return TestStageResult(
-            predicted, ground_truth
+            predicted, ground_truth,
+            end_time - start_time
         )
         
 
