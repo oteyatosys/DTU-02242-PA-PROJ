@@ -82,3 +82,8 @@ class TestStage:
                         raise ValueError(f"Invalid line range {change.line_range} for file: {file_to_revert}")
                 else:
                     raise FileNotFoundError(f"File to modify does not exist: {file_to_revert}")
+                
+
+@dataclass
+class TestScenario:
+    stages: List[TestStage] = field(default_factory=list)
