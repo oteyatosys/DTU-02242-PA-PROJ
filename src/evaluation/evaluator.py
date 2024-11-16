@@ -3,8 +3,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import List
 
-from evaluation.results import TestScenarioResult, TestStageResult
-from evaluation.test_scenario import Addition, Deletion, TestScenario, TestStage
+from evaluation.results import TestScenarioResult, TestStageResult, TestSuiteResult
+from evaluation.test_scenario import Addition, Deletion, TestScenario, TestStage, TestSuite
 from prediction.call_graph_predictor import CallGraphPredictor
 from prediction.predictor import TestPredictor
 from preparation.prepare import perform_data_rotation, reset_data
@@ -20,67 +20,62 @@ old_dir = data_dir / "old"
 
 @dataclass
 class Evaluator:
-    maven_project: Path
+    def evaluate_suite(
+        self,
+        predictor: TestPredictor,
+        test_suite: TestSuite
+    ):
+        results: List[TestScenarioResult] = []
 
-    def evaluate(
+        for test_scenario in test_suite.scenarios:
+            results.append(
+                self.evaluate_scenario(predictor, test_scenario)
+            )
+
+        return TestSuiteResult(
+            results
+        )
+
+    def evaluate_scenario(
         self, 
         predictor: TestPredictor,
-        TestScenario: TestScenario
+        test_scenario: TestScenario
     ) -> TestScenarioResult:
-        reset_data(self.maven_project)
+        maven_project = test_scenario.maven_project
+
+        reset_data(maven_project)
 
         stage_results: List[TestStageResult] = []
 
-        for stage in TestScenario.stages:
-            src_dir = self.maven_project / "src/main/java"
-
-            stage.apply_changes(src_dir)
-            perform_data_rotation(self.maven_project)
-
-            ground_truth = stage.ground_truth
-
-            new_program = Program.load(new_dir)
-            old_program = Program.load(old_dir)
-            
-            predicted = predictor.predict(old_program, new_program)
-
-            stage.revert_changes(src_dir)
-
+        for stage in test_scenario.stages:
             stage_results.append(
-                TestStageResult(
-                    predicted, ground_truth
-                )
+                self.evaluate_stage(predictor, stage, maven_project)
             )
 
         return TestScenarioResult(stage_results)
 
+    def evaluate_stage(
+        self,
+        predictor: TestPredictor,
+        stage: TestStage,
+        maven_project: Path
+    ):
+        src_dir = maven_project / "src/main/java"
 
-def main():
-    evaluator = Evaluator(
-        Path("java-example")
-    )
+        stage.apply_changes(src_dir)
+        perform_data_rotation(maven_project)
 
-    predictor: TestPredictor = CallGraphPredictor()
+        ground_truth = stage.ground_truth
 
-    test_scenario = TestScenario([
-        TestStage([
-            Deletion(
-                Path("org/example/App.java"), (20, 20)),
-            Addition(
-                Path("org/example/App.java"), 20,             
-"""
-        return n == 0 ? 10 : n * factorial(n - 1);
-"""
-            ),
-        ], {
-            MethodSignature.from_str("org.example.AppTest.testFactorial:()V")
-        })
-    ])
-    
-    result = evaluator.evaluate(predictor, test_scenario)
+        new_program = Program.load(new_dir)
+        old_program = Program.load(old_dir)
+        
+        predicted = predictor.predict(old_program, new_program)
 
-    result.print_stats()
+        stage.revert_changes(src_dir)
 
+        return TestStageResult(
+            predicted, ground_truth
+        )
+        
 
-if __name__ == "__main__":
-    main()

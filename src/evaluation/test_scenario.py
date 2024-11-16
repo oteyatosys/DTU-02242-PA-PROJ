@@ -132,4 +132,10 @@ class TestStage:
 
 @dataclass
 class TestScenario:
+    maven_project: Path
     stages: List[TestStage] = field(default_factory=list)
+
+
+@dataclass
+class TestSuite:
+    scenarios: List[TestScenario] = field(default_factory=list)
