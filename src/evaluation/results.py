@@ -104,3 +104,13 @@ class TestScenarioResult:
         total_recall = self.compute_total_recall()
         return 2 * (total_precision * total_recall) / (total_precision + total_recall)
     
+    def print_stats(self):
+        print(f"Total time taken: {self.compute_total_time_taken()}")
+        print(f"Average time taken: {self.compute_average_time_taken()}")
+        print(f"Total true positives: {self.compute_total_true_positive_count()}")
+        print(f"Total false positives: {self.compute_total_false_positive_count()}")
+        print(f"Total false negatives: {self.compute_total_false_negative_count()}")
+        print(f"Total accuracy: {self.compute_total_accuracy()}")
+        print(f"Total precision: {self.compute_total_precision()}")
+        print(f"Total recall: {self.compute_total_recall()}")
+        print(f"Total F1 score: {self.compute_total_f1_score()}")

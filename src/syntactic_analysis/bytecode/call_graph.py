@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 
 from reader.method_signature import MethodSignature
 from reader.program import Program
+import logging as l
 
 @dataclass
 class CallGraph:
@@ -71,17 +72,17 @@ def extract_methods_and_calls(program: Program) -> Tuple[Set[MethodSignature], D
         if not bytecode:
             continue
 
-        print(f"Extracting calls from {callsite_signature}")
+        l.debug(f"Extracting calls from {callsite_signature}")
         
         for instruction in bytecode:
             if instruction["opr"] == "invoke":
                 if instruction["access"] != "static":
-                    print(f"Skipping non-static call: {instruction}")
+                    l.debug(f"Skipping non-static call: {instruction}")
                     continue
 
                 callee_signature = MethodSignature.from_bytecode(instruction["method"])
 
-                print(f"Found call to {callee_signature}")
+                l.debug(f"Found call to {callee_signature}")
                 calls[callsite_signature].append(callee_signature)
 
     return method_signatures, calls
@@ -98,7 +99,7 @@ def build_call_graph(program: Program) -> CallGraph:
 
             # Skip callees that are not in the program
             if not callee in methods:
-                print(f"Skipping call to {callee} from {callsite}")
+                l.debug(f"Skipping call to {callee} from {callsite}")
                 continue
 
             call_graph.add_edge(callsite, callee)

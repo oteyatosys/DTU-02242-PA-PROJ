@@ -10,6 +10,9 @@ from prediction.predictor import TestPredictor
 from preparation.prepare import perform_data_rotation, reset_data
 from reader.method_signature import MethodSignature
 from reader.program import Program
+import logging as l
+
+l.basicConfig(level=l.INFO)
 
 data_dir = Path("data")
 new_dir = data_dir / "new"
@@ -76,7 +79,7 @@ def main():
     
     result = evaluator.evaluate(predictor, test_scenario)
 
-    print(result)
+    result.print_stats()
 
 
 if __name__ == "__main__":

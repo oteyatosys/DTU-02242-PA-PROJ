@@ -7,6 +7,7 @@ from prediction.predictor import TestPredictor
 from reader.method_signature import MethodSignature
 from reader.program import Program
 from syntactic_analysis.bytecode.call_graph import build_call_graph
+import logging as l
 
 
 @dataclass
@@ -32,7 +33,7 @@ class CallGraphPredictor(TestPredictor):
         def walk_callgraph(start_node: MethodSignature, old_signature: MethodSignature) -> bool:
 
             if not new_program.contains_method(old_signature):
-                print(f"Method {old_signature} has been removed")
+                l.debug(f"Method {old_signature} has been removed")
                 test_predictions.add(start_node)
                 new_methods.add(old_signature)
                 return False
@@ -49,7 +50,7 @@ class CallGraphPredictor(TestPredictor):
             diff = jsondiff.diff(old_bytecode, new_bytecode)
             
             if diff:
-                print(f"Method {old_signature} has changed:")
+                l.debug(f"Method {old_signature} has changed:")
                 test_predictions.add(start_node)
                 changed_methods.add(old_signature)
                 return False
