@@ -42,7 +42,7 @@ def convert_classes_to_json(src_dir, dest_dir):
         with open(out_file, "w") as out_f:
             json.dump(json_data, out_f, indent=4)
 
-def perform_rotation(maven_project: Path):
+def perform_data_rotation(maven_project: Path):
     shutil.rmtree(tmp_dir, ignore_errors=True)
 
     try:
@@ -76,3 +76,8 @@ def perform_rotation(maven_project: Path):
     finally:
         # Cleanup tmp directory
         shutil.rmtree(tmp_dir, ignore_errors=True)
+
+def reset_data(maven_project: Path):
+    shutil.rmtree(data_dir, ignore_errors=True)
+
+    perform_data_rotation(maven_project)
