@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import sys
 
 @dataclass(frozen=True)
 class MethodSignature:
@@ -20,6 +21,32 @@ class MethodSignature:
             MethodSignature.type_str(returns),
             tuple(MethodSignature.type_str(param) for param in params),
         )
+
+
+    @staticmethod
+    def from_str(shortform: str):
+        import re
+
+        RE = (
+            r"(?P<class_name>.+)\.(?P<method_name>.*)\:\((?P<params>.*)\)(?P<return>.*)"
+        )
+        if not (i := re.match(RE, shortform)):
+            print("invalid method name: %r", shortform)
+            sys.exit(-1)
+
+        type_map = {
+            "I": "int",
+            "C": "char",
+            "V": "void",
+        }
+
+        return MethodSignature(
+            class_name=i["class_name"].replace('.','/'),
+            name=i["method_name"],
+            parameters=tuple(type_map[j] for j in i["params"]),
+            return_type=type_map[i["return"]],
+        )
+
 
     @staticmethod
     def from_bytecode(bytecode: dict) -> 'MethodSignature':
