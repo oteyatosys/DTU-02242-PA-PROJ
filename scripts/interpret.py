@@ -12,7 +12,7 @@ from static_analysis.interpreter.abstract_interpreter import AbstractInterpreter
 from static_analysis.interpreter.abstractions.abstract_state import AbstractState
 from static_analysis.interpreter.arithmetic.sign_arithmetic import SignArithmetic
 
-if __name__ == "__main__":
+def main():
     program = Program.load(project_root / "data" / "new")
     
     for _, method in program.all_test_methods():
@@ -32,3 +32,7 @@ if __name__ == "__main__":
 
         print(f"End states: {interpreter.final}")
         print(f"PCs run: {interpreter.pcs}")
+
+
+if __name__ == "__main__":
+    main()

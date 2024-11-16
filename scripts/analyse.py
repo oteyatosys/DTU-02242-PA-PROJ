@@ -14,15 +14,13 @@ from typing import Set
 from reader.method_signature import MethodSignature
 from reader.program import Program
 from syntactic_analysis.bytecode.call_graph import build_call_graph
-import jsondiff
-
 
 data_dir: Path = project_root / "data"
 
 new_dir = data_dir / "new"
 old_dir = data_dir / "old"
 
-if __name__ == "__main__":
+def main():
     new_program = Program.load(new_dir)
     old_program = Program.load(old_dir)
 
@@ -34,3 +32,6 @@ if __name__ == "__main__":
 
     # print("Int literals found in the program:")
     # print(ints)
+
+if __name__ == "__main__":
+    main()
