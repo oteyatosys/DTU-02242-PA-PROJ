@@ -24,9 +24,9 @@ def main():
     new_program = Program.load(new_dir)
     old_program = Program.load(old_dir)
 
-    predictor: TestPredictor = CallGraphPredictor(old_program, new_program)
+    predictor: TestPredictor = CallGraphPredictor()
 
-    test: Set[MethodSignature] = predictor.predict()
+    test: Set[MethodSignature] = predictor.predict(old_program, new_program)
 
     # ints = get_int_literals(program)
 
