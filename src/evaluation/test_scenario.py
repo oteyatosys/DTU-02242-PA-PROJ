@@ -25,29 +25,6 @@ class Change(ABC):
     def revert(self, base_path: Path):
         raise NotImplementedError
 
-@dataclass
-class DecomposableChange(ABC):
-    def decompose(self) -> List[Change]:
-        raise NotImplementedError
-
-@dataclass
-class ReplaceLines(DecomposableChange):
-    file_path: Path
-    line_range: Tuple[int, int]
-    new_content: str
-
-    def decompose(self) -> List[Change]:
-        return [
-            Deletion(
-                file_path=self.file_path,
-                line_range=self.line_range
-            ),
-            Addition(
-                file_path=self.file_path,
-                after_line=self.line_range[1],
-                new_content=self.new_content
-            )
-        ]
 
 @dataclass
 class Deletion(Change):
@@ -157,6 +134,30 @@ class Addition(Change):
         return f"Addition(file_path={self.file_path}, after_line={self.after_line})"
 
 
+@dataclass
+class DecomposableChange(ABC):
+    def decompose(self) -> List[Addition|Deletion]:
+        raise NotImplementedError
+
+@dataclass
+class ReplaceLines(DecomposableChange):
+    file_path: Path
+    line_range: Tuple[int, int]
+    new_content: str
+
+    def decompose(self) -> List[Addition|Deletion]:
+        return [
+            Deletion(
+                file_path=self.file_path,
+                line_range=self.line_range
+            ),
+            Addition(
+                file_path=self.file_path,
+                after_line=self.line_range[1],
+                new_content=self.new_content
+            )
+        ]
+
 class TestStage:
     def __init__(self, changes: List[Union[Change, DecomposableChange]] = [], ground_truth: Set[MethodSignature] = set()):
         self.ground_truth: Set[MethodSignature] = set()
@@ -179,12 +180,12 @@ class TestStage:
         self.changes.sort(key=lambda c: (c.order_key(), isinstance(c, Deletion)), reverse=(dir == 'desc'))
 
 
-    def add_changes(self, changes: List[Change]):
+    def add_changes(self, changes: List[Addition|Deletion]):
         for change in changes:
             self.add_change(change)
 
 
-    def add_change(self, change: Change):
+    def add_change(self, change: Addition|Deletion):
         if change.lower() < 0:
             raise ValueError(f"Invalid line number {change.lower()} for change: {change}")
         
@@ -230,6 +231,7 @@ class TestStage:
         self._order_changes('asc')
         for change in self.changes:
             change.revert(base_path)
+
 
 @dataclass
 class TestScenario:
