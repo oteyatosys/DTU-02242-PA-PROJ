@@ -18,6 +18,12 @@ class Change(ABC):
     
     def lower() -> int:
         raise NotImplementedError
+    
+    def apply(self, base_path: Path):
+        raise NotImplementedError
+    
+    def revert(self, base_path: Path):
+        raise NotImplementedError
 
 @dataclass
 class DecomposableChange(ABC):
@@ -57,6 +63,43 @@ class Deletion(Change):
     
     def lower(self) -> int:
         return self.line_range[0]
+    
+    def apply(self, base_path: Path):
+        file_to_change = base_path / self.file_path
+        if file_to_change.exists():
+            with file_to_change.open('r') as f:
+                lines = f.readlines()
+            start, end = self.line_range
+            start = start - 1
+            end = end - 1
+
+            if 0 <= start <= end < len(lines):
+                # Store the original content for reverting later
+                self.original_content = ''.join(lines[start:end + 1])
+                del lines[start:end + 1]
+                with file_to_change.open('w') as f:
+                    f.writelines(lines)
+            else:
+                raise ValueError(f"Invalid line range {self.line_range} for file: {file_to_change}")
+        else:
+            raise FileNotFoundError(f"File to modify does not exist: {file_to_change}")
+
+    def revert(self, base_path: Path):
+        file_to_revert = base_path / self.file_path
+        if file_to_revert.exists():
+            with file_to_revert.open('r') as f:
+                lines = f.readlines()
+            start, end = self.line_range
+            start = start - 1
+            end = end - 1
+            if 0 <= start <= end <= len(lines):
+                lines[start:start] = self.original_content.splitlines(keepends=True)
+                with file_to_revert.open('w') as f:
+                    f.writelines(lines)
+            else:
+                raise ValueError(f"Invalid line range {self.line_range} for file: {file_to_revert}")
+        else:
+            raise FileNotFoundError(f"File to modify does not exist: {file_to_revert}")
 
     def __repr__(self):
         return f"Deletion(file_path={self.file_path}, line_range={self.line_range})"
@@ -76,6 +119,39 @@ class Addition(Change):
     
     def lower(self) -> int:
         return self.after_line
+    
+    def apply(self, base_path: Path):
+        file_to_change = base_path / self.file_path
+        if file_to_change.exists():
+            with file_to_change.open('r') as f:
+                lines = f.readlines()
+            after_line = self.after_line
+            if 0 <= after_line <= len(lines):
+                new_lines = self.new_content.lstrip('\n').splitlines(keepends=True)
+                lines = lines[:after_line] + new_lines + lines[after_line:]
+                with file_to_change.open('w') as f:
+                    f.writelines(lines)
+            else:
+                raise ValueError(f"Invalid line number {after_line} for file: {file_to_change}")
+        else:
+            raise FileNotFoundError(f"File to modify does not exist: {file_to_change}")
+
+    def revert(self, base_path):
+        file_to_revert = base_path / self.file_path
+        if file_to_revert.exists():
+            with file_to_revert.open('r') as f:
+                lines = f.readlines()
+            after_line = self.after_line
+            new_lines_length = len(self.new_content.lstrip('\n').splitlines())
+            if 0 <= after_line < len(lines):
+                # Remove the added lines
+                lines = lines[:after_line] + lines[after_line + new_lines_length:]
+                with file_to_revert.open('w') as f:
+                    f.writelines(lines)
+            else:
+                raise ValueError(f"Invalid line number {after_line} for file: {file_to_revert}")
+        else:
+            raise FileNotFoundError(f"File to modify does not exist: {file_to_revert}")
 
     def __repr__(self):
         return f"Addition(file_path={self.file_path}, after_line={self.after_line})"
@@ -99,6 +175,7 @@ class TestStage:
 
     def _order_changes(self, dir: str = 'desc'):
         # Sort changes in descending order by starting line to avoid affecting subsequent changes
+        # In case of same key, additions should come before deletions
         self.changes.sort(key=lambda c: (c.order_key(), isinstance(c, Deletion)), reverse=(dir == 'desc'))
 
 
@@ -127,89 +204,17 @@ class TestStage:
 
 
     def apply_changes(self, base_path: Path):
+        # Sort changes in descending order by starting line to avoid affecting subsequent changes
         self._order_changes('desc')
         for change in self.changes:
-            file_to_change = base_path / change.file_path
-            if isinstance(change, Deletion):
-                if file_to_change.exists():
-                    with file_to_change.open('r') as f:
-                        lines = f.readlines()
-                    start, end = change.line_range
-                    start = start - 1
-                    end = end - 1
-                    if 0 <= start <= end < len(lines):
-                        # Store the original content for reverting later
-                        change.original_content = ''.join(lines[start:end + 1])
-                        del lines[start:end + 1]
-                        with file_to_change.open('w') as f:
-                            f.writelines(lines)
-                    else:
-                        raise ValueError(f"Invalid line range {change.line_range} for file: {file_to_change}")
-                else:
-                    raise FileNotFoundError(f"File to modify does not exist: {file_to_change}")
+            change.apply(base_path)
 
-            elif isinstance(change, Addition):
-                if file_to_change.exists():
-                    with file_to_change.open('r') as f:
-                        lines = f.readlines()
-                    after_line = change.after_line
-                    if 0 <= after_line <= len(lines):
-                        new_lines = change.new_content.lstrip('\n').splitlines(keepends=True)
-                        lines = lines[:after_line] + new_lines + lines[after_line:]
-                        with file_to_change.open('w') as f:
-                            f.writelines(lines)
-                    else:
-                        raise ValueError(f"Invalid line number {after_line} for file: {file_to_change}")
-                else:
-                    raise FileNotFoundError(f"File to modify does not exist: {file_to_change}")
-
-
-    def _revert_deletion(self, change: Deletion, file_to_revert: Path):
-        if file_to_revert.exists():
-            with file_to_revert.open('r') as f:
-                lines = f.readlines()
-            start, end = change.line_range
-            start = start - 1
-            end = end - 1
-            if 0 <= start <= end <= len(lines):
-                lines[start:start] = change.original_content.splitlines(keepends=True)
-                with file_to_revert.open('w') as f:
-                    f.writelines(lines)
-            else:
-                raise ValueError(f"Invalid line range {change.line_range} for file: {file_to_revert}")
-        else:
-            raise FileNotFoundError(f"File to modify does not exist: {file_to_revert}")
-    
-    def _revert_addition(self, change: Addition, file_to_revert: Path):
-        if file_to_revert.exists():
-            with file_to_revert.open('r') as f:
-                lines = f.readlines()
-            after_line = change.after_line
-            new_lines_length = len(change.new_content.lstrip('\n').splitlines())
-            if 0 <= after_line < len(lines):
-                # Remove the added lines
-                lines = lines[:after_line] + lines[after_line + new_lines_length:]
-                with file_to_revert.open('w') as f:
-                    f.writelines(lines)
-            else:
-                raise ValueError(f"Invalid line number {after_line} for file: {file_to_revert}")
-        else:
-            raise FileNotFoundError(f"File to modify does not exist: {file_to_revert}")
 
     def revert_changes(self, base_path: Path):
         # Sort changes in ascending order by starting line to revert correctly
         self._order_changes('asc')
         for change in self.changes:
-            file_to_revert = base_path / change.file_path
-            match change:
-                case Deletion():
-                    self._revert_deletion(change, file_to_revert)
-                case Addition():
-                    self._revert_addition(change, file_to_revert)
-                case _:
-                    raise ValueError(f"Invalid change type: {change}")
-
-
+            change.revert(base_path)
 
 @dataclass
 class TestScenario:
