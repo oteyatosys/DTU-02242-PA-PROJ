@@ -48,3 +48,56 @@ Hej
     reverted_content = file_to_edit.read_text()
 
     assert reverted_content == original_content
+
+def test_overlapping_changes(tmp_path: Path):
+    # Setup
+    base_path: Path = tmp_path / "base_code"
+    base_path.mkdir()
+    file_rel = Path("existing_file.py")
+    file_to_edit = base_path / file_rel
+    original_content = """line 1
+line 2
+line 3
+line 4
+line 5
+line 6
+"""
+    file_to_edit.write_text(original_content)
+
+    # Create TestScenario
+    try:
+        TestStage([
+            Deletion(
+                file_rel, (4, 6)),
+            Deletion(
+                file_rel, (5, 6))
+        ])
+        assert False
+    except ValueError:
+        assert True
+
+
+    try:
+        TestStage([
+            Deletion(
+                file_rel, (3, 6)),
+            Addition(
+                file_rel, 4,
+                "Hej\n"),
+        ])
+        assert False
+    except ValueError:
+        assert True
+
+    try:
+        TestStage([
+            Addition(
+                file_rel, 4,
+                "Hej\n"),
+            Addition(
+                file_rel, 4,
+                "Test\n"),
+        ])
+        assert False
+    except ValueError:
+        assert True
