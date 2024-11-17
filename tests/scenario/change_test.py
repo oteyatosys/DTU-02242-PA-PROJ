@@ -1,5 +1,5 @@
 from pathlib import Path
-from evaluation.test_scenario import Addition, Deletion, TestStage
+from evaluation.test_scenario import Addition, Deletion, ReplaceLines, TestStage
 
 def test_apply_and_revert_changes(tmp_path: Path):
     # Setup
@@ -26,6 +26,10 @@ line 6
             Addition(
                 file_rel, 6,
                 "Hej\n"),
+            ReplaceLines(
+                file_rel, (2, 3),
+                "Test\n"
+            )
         ])
 
     # Apply changes
@@ -33,8 +37,7 @@ line 6
     modified_content = file_to_edit.read_text()
     expected_modified_content = """print('Hello World')
 line 1
-line 2
-line 3
+Test
 line 6
 Hej
 """
