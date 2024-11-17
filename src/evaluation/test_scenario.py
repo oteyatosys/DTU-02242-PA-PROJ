@@ -199,6 +199,13 @@ class TestStage:
                 not (change.upper() < existing_change.lower() or change.lower() > existing_change.upper())
             ):
                 raise ValueError(f"Overlapping deletion detected: {change} overlaps with {existing_change}")
+
+            if (
+                isinstance(change, Addition) and
+                change.file_path == existing_change.file_path and
+                not (change.upper() < existing_change.lower() or change.lower() >= existing_change.upper())
+            ):
+                raise ValueError(f"Overlapping addition detected: {change} overlaps with {existing_change}")
         
         self.changes.append(change)
 
