@@ -4,14 +4,12 @@ from pathlib import Path
 from typing import List
 
 from evaluation.results import TestScenarioResult, TestStageResult, TestSuiteResult
-from evaluation.test_scenario import Addition, Deletion, TestScenario, TestStage, TestSuite
-from prediction.call_graph_predictor import CallGraphPredictor
+from evaluation.test_scenario import TestScenario, TestStage, TestSuite
 from prediction.predictor import TestPredictor
 from preparation.prepare import perform_data_rotation, reset_data
-from reader.method_signature import MethodSignature
 from reader.program import Program
 import logging as l
-from timeit import default_timer as timer, timeit
+from timeit import default_timer as timer
 
 l.basicConfig(level=l.INFO)
 
@@ -84,5 +82,3 @@ class Evaluator:
             predicted, ground_truth,
             end_time - start_time
         )
-        
-
