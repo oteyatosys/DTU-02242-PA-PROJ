@@ -192,21 +192,29 @@ class TestStage:
             raise ValueError(f"Invalid line range {change.lower()}:{change.upper} for change: {change}")
 
         for existing_change in self.changes:
-            # Ensure no overlapping deletions are added
+            left, right = (change, existing_change) if isinstance(change, Addition) else (existing_change, change)
             if (
-                isinstance(change, Deletion) and
-                change.file_path == existing_change.file_path and
-                not (change.upper() < existing_change.lower() or change.lower() > existing_change.upper())
+                # Ensure no overlapping deletions are added
+                isinstance(left, Deletion) and isinstance(right, Deletion) and
+                left.file_path == right.file_path and
+                not (left.upper() < right.lower() or left.lower() > right.upper())
             ):
                 raise ValueError(f"Overlapping deletion detected: {change} overlaps with {existing_change}")
-
-            if (
-                isinstance(change, Addition) and
-                change.file_path == existing_change.file_path and
-                not (change.upper() < existing_change.lower() or change.lower() >= existing_change.upper())
+            elif (
+                # Ensure no overlapping additions are added
+                isinstance(left, Addition) and isinstance(right, Addition) and
+                left.file_path == right.file_path and
+                left.lower() == right.lower()
             ):
                 raise ValueError(f"Overlapping addition detected: {change} overlaps with {existing_change}")
-        
+            elif (
+                # Ensure no overlapping addition and deletion are added
+                isinstance(left, Addition) and
+                left.file_path == right.file_path and
+                not (left.upper() < right.lower() or left.lower() >= right.upper())
+            ):
+                raise ValueError(f"Overlapping addition detected: {change} overlaps with {existing_change}")
+
         self.changes.append(change)
 
 
