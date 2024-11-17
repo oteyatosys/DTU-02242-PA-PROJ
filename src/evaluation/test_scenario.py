@@ -159,7 +159,7 @@ class Addition(Change):
 
 class TestStage:
     def __init__(self, changes: List[Union[Change, DecomposableChange]] = [], ground_truth: Set[MethodSignature] = set()):
-        self.ground_truth = set()
+        self.ground_truth: Set[MethodSignature] = set()
         self.ground_truth.update(ground_truth)
 
         self.changes: List[Change] = []
