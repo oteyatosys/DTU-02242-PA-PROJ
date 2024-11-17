@@ -179,12 +179,12 @@ class TestStage:
         self.changes.sort(key=lambda c: (c.order_key(), isinstance(c, Deletion)), reverse=(dir == 'desc'))
 
 
-    def add_changes(self, changes: List[Union[Change]]):
+    def add_changes(self, changes: List[Change]):
         for change in changes:
             self.add_change(change)
 
 
-    def add_change(self, change: Union[Change]):
+    def add_change(self, change: Change):
         if change.lower() < 0:
             raise ValueError(f"Invalid line number {change.lower()} for change: {change}")
         

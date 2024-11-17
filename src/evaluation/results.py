@@ -167,7 +167,12 @@ class TestSuiteResult:
     def compute_total_precision(self) -> float:
         total_true_positive_count = self.compute_total_true_positive_count()
         total_false_positive_count = self.compute_total_false_positive_count()
-        return total_true_positive_count / (total_true_positive_count + total_false_positive_count)
+        
+        denominator = total_true_positive_count + total_false_positive_count
+        if denominator == 0:
+            return 0.0
+        
+        return total_true_positive_count / denominator
     
     def compute_total_recall(self) -> float:
         total_true_positive_count = self.compute_total_true_positive_count()
