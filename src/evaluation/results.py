@@ -177,12 +177,22 @@ class TestSuiteResult:
     def compute_total_recall(self) -> float:
         total_true_positive_count = self.compute_total_true_positive_count()
         total_false_negative_count = self.compute_total_false_negative_count()
-        return total_true_positive_count / (total_true_positive_count + total_false_negative_count)
+        
+        denominator = total_true_positive_count + total_false_negative_count
+        if denominator == 0:
+            return 0.0
+        
+        return total_true_positive_count / denominator
     
     def compute_total_f1_score(self) -> float:
         total_precision = self.compute_total_precision()
         total_recall = self.compute_total_recall()
-        return 2 * (total_precision * total_recall) / (total_precision + total_recall)
+        
+        denominator = total_precision + total_recall
+        if denominator == 0:
+            return 0.0
+        
+        return 2 * (total_precision * total_recall) / denominator
     
     def print_stats(self):
         print(f"Total time taken: {self.compute_total_time_taken()}")
