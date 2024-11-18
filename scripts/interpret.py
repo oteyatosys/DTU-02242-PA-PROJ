@@ -17,11 +17,13 @@ def main():
     
     for _, method in program.all_test_methods():
         print(f"Running test: {method.signature}")
+        print("-------------------------")
 
         initial_state = AbstractState([], [])
 
         interpreter = AbstractInterpreter(
-            bytecode=method.bytecode,
+            program=program,
+            signature=method.signature,
             arithmetic= SignArithmetic()
         )
 

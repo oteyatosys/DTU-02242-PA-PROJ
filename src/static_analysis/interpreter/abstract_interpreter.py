@@ -2,17 +2,19 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Tuple
 from static_analysis.interpreter.abstractions import AbstractState, BoolSet, SignSet, Bot
 from static_analysis.interpreter.arithmetic.arithmetic import Arithmetic
+from reader import Program, MethodSignature
 from jpamb_utils import JvmType
 
 PC = int
 
-@dataclass
 class AbstractInterpreter:
-    bytecode : dict[int, list]
-    arithmetic : Arithmetic
-    generated: int = 0
-    final : set[str] = field(default_factory=set)
-    pcs : set[int] = field(default_factory=set)
+    def __init__(self, program: Program, signature: MethodSignature, arithmetic: Arithmetic):
+        self.program = program
+        self.signature = signature
+        self.arithmetic = arithmetic
+        self.generated = 0
+        self.final = set()
+        self.pcs = set()
 
     def analyse(self, initial: Tuple[PC, AbstractState]):
         states: Dict[PC, AbstractState] = {initial[0]: initial[1]}
@@ -38,7 +40,7 @@ class AbstractInterpreter:
 
 
     def step(self, pc: int, astate: AbstractState):
-        bc = self.bytecode[pc]
+        bc = self.program.method(self.signature).bytecode[pc]
         print(f"Running: ${bc['opr']}")
 
         for (pc_, s_) in self.lookup(f"step_{bc['opr']}")(bc, pc, astate):
