@@ -21,15 +21,15 @@ class AbstractState:
     # Meet operation
     def __and__(self, other: 'AbstractState') -> 'AbstractState':
         self.ensure_compatability(other)
-        stack_meet = [s1 & s2 for s1, s2 in zip(other.stack, self.stack, fillvalue=set())]
-        locals_meet = [l1 & l2 for l1, l2 in zip(other.locals, self.locals, fillvalue=set())]
+        stack_meet = [s1 & s2 for s1, s2 in zip(other.stack, self.stack)]
+        locals_meet = [l1 & l2 for l1, l2 in zip(other.locals, self.locals)]
         return AbstractState(stack=stack_meet, locals=locals_meet)
     
     # Join operation
     def __or__(self, other: 'AbstractState') -> 'AbstractState':
         self.ensure_compatability(other)
-        stack_join = [s1 | s2 for s1, s2 in zip(other.stack, self.stack, fillvalue=set())]
-        locals_join = [l1 | l2 for l1, l2 in zip(other.locals, self.locals, fillvalue=set())]
+        stack_join = [s1 | s2 for s1, s2 in zip(other.stack, self.stack)]
+        locals_join = [l1 | l2 for l1, l2 in zip(other.locals, self.locals)]
         return AbstractState(stack=stack_join, locals=locals_join)
 
     def copy(self):
