@@ -1,4 +1,3 @@
-from dataclasses import dataclass, field
 from typing import Dict, List, Tuple
 from static_analysis.interpreter.abstractions import AbstractState, BoolSet, SignSet, Bot
 from static_analysis.interpreter.arithmetic.arithmetic import Arithmetic
