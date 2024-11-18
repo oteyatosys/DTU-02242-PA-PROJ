@@ -160,6 +160,16 @@ class AbstractInterpreter:
                 yield (bc["target"], astate.copy())
             else:
                 yield (pc + 1, astate.copy())
+    
+    def step_if(self, bc: list, pc: int, astate: AbstractState):
+        right = astate.stack.pop()
+        left = astate.stack.pop()
+
+        for b in self.arithmetic.compare(bc["condition"], left, right):
+            if b:
+                yield (bc["target"], astate.copy())
+            else:
+                yield (pc + 1, astate.copy())
 
     def step_new(self, bc: list, pc: int, astate: AbstractState):
         new_state = astate.copy()
