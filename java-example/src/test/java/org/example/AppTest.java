@@ -1,6 +1,6 @@
 package org.example;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 public class AppTest {
@@ -22,7 +22,8 @@ public class AppTest {
         assert App.factorial(2) == 2;
         assert App.factorial(3) == 6;
     }
-    
+
+    @Test
     public int testReturn( ){
         assertTrue( true );
         return 42;
