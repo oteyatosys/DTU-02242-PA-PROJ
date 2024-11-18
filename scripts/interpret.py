@@ -16,9 +16,6 @@ def main():
     program = Program.load(project_root / "data" / "new")
     
     for _, method in program.all_test_methods():
-        if method.signature.name == "<init>":
-            continue
-
         print(f"Running test: {method.signature}")
 
         initial_state = AbstractState([], [])
