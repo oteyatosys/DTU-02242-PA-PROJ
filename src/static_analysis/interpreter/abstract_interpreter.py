@@ -1,9 +1,6 @@
 from dataclasses import dataclass, field
 from typing import Dict, List, Tuple
-from static_analysis.interpreter.abstractions.abstract_state import AbstractState
-from static_analysis.interpreter.abstractions.bool_set import BoolSet
-from static_analysis.interpreter.abstractions.sign_set import SignSet
-from static_analysis.interpreter.abstractions.bot import Bot
+from static_analysis.interpreter.abstractions import AbstractState, BoolSet, SignSet, Bot
 from static_analysis.interpreter.arithmetic.arithmetic import Arithmetic
 from jpamb_utils import JvmType
 
