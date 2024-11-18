@@ -17,7 +17,7 @@ def main():
         project_root / "java-example", [
         TestStage([
             ReplaceLines(
-                Path("org/example/App.java"), (20, 20),
+                Path("org/example/App.java"), (24, 24),
 """
         return n == 0 ? 10 : n * factorial(n - 1);
 """
