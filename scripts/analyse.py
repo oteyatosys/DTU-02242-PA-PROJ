@@ -28,6 +28,9 @@ def main():
 
     test: Set[MethodSignature] = predictor.predict(old_program, new_program)
 
+    print("Predicted test methods:")
+    print(test)
+
     # ints = get_int_literals(program)
 
     # print("Int literals found in the program:")
