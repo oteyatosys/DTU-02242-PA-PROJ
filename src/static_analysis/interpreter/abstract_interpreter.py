@@ -43,7 +43,6 @@ class AbstractInterpreter:
         print(f"Running: ${bc['opr']}")
 
         for (pc_, s_) in self.lookup(f"step_{bc['opr']}")(bc, pc, astate):
-
             if pc_ == -1:
                 self.final.add(s_.done)
             else:
@@ -100,15 +99,22 @@ class AbstractInterpreter:
         yield (-1, new_state)
 
     def step_invoke(self, bc: list, pc: int, astate: AbstractState):
+        new_state = astate.copy()
         access: str = bc["access"]
 
         if access == "special":
             # Just pass, as method invocation on objects is not supported
             yield (pc + 1, astate)
         elif access == "static":
-            # TODO: Implement static method invocation
+            # Extract arguments from the stack
+            args = [new_state.stack.pop() for _ in bc["method"]["args"]]
+
             print(f"TODO: Spawn new abstract interpreter and collect return values")
-            yield (pc + 1, astate)
+
+            # Append the retunr value to the stack
+            new_state.stack.append(SignSet.top())
+
+            yield (pc + 1, new_state)
         else:
             raise NotImplemented(f"can't handle {bc!r}")
 
