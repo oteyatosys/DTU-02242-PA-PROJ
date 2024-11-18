@@ -11,17 +11,20 @@ from reader.program import Program
 from static_analysis.interpreter.abstract_interpreter import PC, AbstractInterpreter
 from static_analysis.interpreter.abstractions.abstract_state import AbstractState
 from static_analysis.interpreter.arithmetic.sign_arithmetic import SignArithmetic
+import logging as l
+
+# l.basicConfig(level=l.DEBUG)
 
 def main():
     program = Program.load(project_root / "data" / "new")
     
     for _, method in program.all_test_methods():
-        print(f"Running test: {method.signature}")
         print("-------------------------")
+        print(f"Running test: {method.signature}")
 
-        if method.name != "testFactorial":
-            print("Skipping")
-            continue
+        # if method.name != "testGetInt":
+        #     print("Skipping")
+        #     continue
 
         interpreter = AbstractInterpreter(
             program=program,
