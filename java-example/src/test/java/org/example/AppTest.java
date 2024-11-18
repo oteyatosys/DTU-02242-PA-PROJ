@@ -22,4 +22,24 @@ public class AppTest {
         assert App.factorial(2) == 2;
         assert App.factorial(3) == 6;
     }
+    
+    public int testReturn( ){
+        assertTrue( true );
+        return 42;
+    }
+
+    @Test
+    public void testGetInt( ){
+        assertEquals(42, App.getNum());
+    }
+
+    @Test
+    public void testRepeat( ){
+        assertEquals("HelloHelloHello", App.repeat("Hello", 3));
+    }
+
+    @Test
+    public void testStringEquality( ){
+        assertEquals("hejsa", "hallo");
+    }
 }

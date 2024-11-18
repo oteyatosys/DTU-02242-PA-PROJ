@@ -12,6 +12,10 @@ public class App {
         return a + 5;
     }
 
+    public static String repeat(String s, int n){
+        return s.repeat(n);
+    }
+
     public static int convertBytesToBits(int a){
         return a * 8;
     }
