@@ -24,8 +24,14 @@ class PC:
     def __add__(self, i: int):
         return PC(self.signature, self.offset + i)
     
+    def __sub__(self, i: int):
+        return PC(self.signature, self.offset - i)
+    
     def next(self) -> 'PC':
         return self + 1
+    
+    def prev(self) -> 'PC':
+        return self - 1
     
     def jump(self, i: int) -> 'PC':
         return PC(self.signature, i)
@@ -49,20 +55,22 @@ class AbstractInterpreter:
         while needs_work:
             curr_idx = needs_work.pop()
 
-            for (next_pc, next_action) in self.step(curr_idx, states[curr_idx]):
+            for (next_pc, next_action) in self.step(curr_idx, states[curr_idx].copy()):
                 self.generated += 1
 
                 next_state = None
+ 
                 match next_action:
                     case NextState(astate):
                         next_state = astate
                     case ReturnValue(value, param_count):
-                        next_state = states[next_pc].copy()
+                        next_state = states.get(next_pc.prev()).copy()
+                        next_state = next_state.copy()
                         next_state.stack = next_state.stack[:-param_count]
                         next_state.stack.append(value)
 
-                old = states.get(next_pc, Bot())
  
+                old = states.get(next_pc, Bot())
                 new_state = old | next_state
 
                 if old != new_state:
