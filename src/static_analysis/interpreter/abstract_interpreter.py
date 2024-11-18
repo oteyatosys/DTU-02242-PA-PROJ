@@ -1,17 +1,10 @@
 from dataclasses import dataclass, field
-from pathlib import Path
 from typing import Dict, List, Tuple
-
-import sys
-
 from static_analysis.interpreter.abstractions.abstract_state import AbstractState
 from static_analysis.interpreter.abstractions.bool_set import BoolSet
 from static_analysis.interpreter.abstractions.sign_set import SignSet
 from static_analysis.interpreter.abstractions.bot import Bot
 from static_analysis.interpreter.arithmetic.arithmetic import Arithmetic
-from static_analysis.interpreter.arithmetic.sign_arithmetic import SignArithmetic
-from static_analysis.method_id import MethodId
-from static_analysis.program import Program
 from jpamb_utils import JvmType
 
 PC = int
@@ -116,6 +109,7 @@ class AbstractInterpreter:
             yield (pc + 1, astate)
         elif access == "static":
             # TODO: Implement static method invocation
+            print(f"TODO: Spawn new abstract interpreter and collect return values")
             yield (pc + 1, astate)
         else:
             raise NotImplemented(f"can't handle {bc!r}")
@@ -152,6 +146,7 @@ class AbstractInterpreter:
     def step_return(self, b: list, pc: int, astate: AbstractState):
         new_state = astate.copy()
 
+        print(f"TODO: Store return value in new_state.done")
         new_state.done = "ok"
 
         yield (-1, new_state)
@@ -196,23 +191,3 @@ def generate_arguments(params: list[JvmType]):
             raise NotImplementedError(f"can't handle {param!r}")
 
 
-if __name__ == "__main__":
-    program_path = Path("data", "decompiled")
-
-    program: Program = Program.parse_program(program_path)
-
-    entry_point = MethodId.parse(sys.argv[1])
-    inputs = list(generate_arguments(entry_point.params))
-
-    initial_state = AbstractState([], inputs)
-    print(f"Initial state: {initial_state}")
-
-    interpreter = AbstractInterpreter(
-        bytecode=program.lookup(entry_point),
-        final=set(),
-        arithmetic=SignArithmetic()
-    )
-
-    interpreter.analyse((0, initial_state))
-
-    print(f"End states: {interpreter.final}")
