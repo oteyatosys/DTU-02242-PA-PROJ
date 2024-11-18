@@ -1,5 +1,6 @@
 from pathlib import Path
 from evaluation.test_scenario import Addition, Deletion, ReplaceLines, TestStage
+import pytest
 
 def test_apply_and_revert_changes(tmp_path: Path):
     # Setup
@@ -64,20 +65,17 @@ line 6
 """
     file_to_edit.write_text(original_content)
 
-    # Create TestScenario
-    try:
+    # Overlapping deletions are not allowed
+    with pytest.raises(ValueError):
         TestStage([
             Deletion(
                 file_rel, (4, 6)),
             Deletion(
                 file_rel, (5, 6))
         ])
-        assert False
-    except ValueError:
-        assert True
 
-
-    try:
+    # An addition after a line to be deleted is not allowed
+    with pytest.raises(ValueError):
         TestStage([
             Deletion(
                 file_rel, (3, 6)),
@@ -85,11 +83,9 @@ line 6
                 file_rel, 4,
                 "Hej\n"),
         ])
-        assert False
-    except ValueError:
-        assert True
 
-    try:
+    # Same line additions are not allowed
+    with pytest.raises(ValueError):
         TestStage([
             Addition(
                 file_rel, 4,
@@ -98,6 +94,3 @@ line 6
                 file_rel, 4,
                 "Test\n"),
         ])
-        assert False
-    except ValueError:
-        assert True
