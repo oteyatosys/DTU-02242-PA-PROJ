@@ -1,9 +1,20 @@
 from dataclasses import dataclass
-from typing import Dict, List, Tuple
+from typing import Any, Dict, Iterable, List, Set, Tuple
 from static_analysis.interpreter.abstractions import AbstractState, BoolSet, SignSet, Bot
 from static_analysis.interpreter.arithmetic.arithmetic import Arithmetic
 from reader import Program, MethodSignature
 from jpamb_utils import JvmType
+
+@dataclass(frozen=True)
+class NextState:
+    next_state: AbstractState
+
+@dataclass(frozen=True)
+class ReturnValue:
+    value: Any
+    param_count: int
+
+Action = NextState | ReturnValue
 
 @dataclass(frozen=True)
 class PC:
@@ -38,30 +49,43 @@ class AbstractInterpreter:
         while needs_work:
             curr_idx = needs_work.pop()
 
-            for pc, astate in self.step(curr_idx, states[curr_idx]):
+            for (next_pc, next_action) in self.step(curr_idx, states[curr_idx]):
                 self.generated += 1
 
-                old = states.get(pc, Bot())
-                
-                states[pc] = old | astate
+                next_state = None
+                match next_action:
+                    case NextState(astate):
+                        next_state = astate
+                    case ReturnValue(value, param_count):
+                        next_state = states[next_pc].copy()
+                        next_state.stack = next_state.stack[:-param_count]
+                        next_state.stack.append(value)
 
-                if old != states[pc]:
-                    needs_work.append(pc)
-                    print(f"New state at {pc}")
+                old = states.get(next_pc, Bot())
+ 
+                new_state = old | next_state
+
+                if old != new_state:
+                    states[next_pc] = new_state
+                    needs_work.append(next_pc)
+                    print(f"New state at {next_pc}")
 
         print(f"Generated {self.generated} states")
         self.pcs.update(states.keys())
         print(f"Final states: {sorted(states.keys())}")
 
 
-    def step(self, pc: PC, astate: AbstractState):
+    def step(self, pc: PC, astate: AbstractState) -> Iterable[Tuple[PC, Action]]:
         bc = self.program.method(pc.signature).bytecode[pc.offset]
 
         print(f"Running: ${bc['opr']}")
 
         for (pc_, s_) in self.lookup(f"step_{bc['opr']}")(bc, pc, astate):
+            pc_: PC
+            s_: Action
+
             if pc_ == -1:
-                self.final.add(s_.done)
+                self.final.add(s_)
             else:
                 yield (pc_, s_)
 
@@ -72,7 +96,7 @@ class AbstractInterpreter:
             raise NotImplementedError(f"can't handle {name!r}")
 
     def step_goto(self, bc: list, pc: PC, astate: AbstractState):
-        yield (pc.jump(bc["target"]), astate.copy())
+        yield (pc.jump(bc["target"]), NextState(astate.copy()))
 
     def step_binary(self, bc: list, pc: PC, astate: AbstractState):
         new_state = astate.copy()
@@ -84,10 +108,10 @@ class AbstractInterpreter:
             result = self.arithmetic.binary(bc["operant"], left, right)
             new_state.stack.append(result)
 
-            yield (pc.next(), new_state)
+            yield (pc.next(), NextState(new_state))
         except ZeroDivisionError:
             new_state.done = "zero division"
-            yield (-1, new_state)
+            yield (-1, NextState(new_state))
 
             right -= SignSet({'0'})
 
@@ -104,7 +128,7 @@ class AbstractInterpreter:
 
         new_state.stack.append(new_state.locals[index])
 
-        yield (pc.next(), new_state)
+        yield (pc.next(), NextState(new_state))
 
     def step_throw(self, bc: list, pc: PC, astate: AbstractState):
         new_state = astate.copy()
@@ -113,7 +137,7 @@ class AbstractInterpreter:
 
         new_state.done = error
 
-        yield (-1, new_state)
+        yield (-1, NextState(new_state))
 
     def step_invoke(self, bc: list, pc: PC, astate: AbstractState):
         new_state = astate.copy()
@@ -121,17 +145,19 @@ class AbstractInterpreter:
 
         if access == "special":
             # Just pass, as method invocation on objects is not supported
-            yield (pc.next(), astate)
+            yield (pc.next(), NextState(astate))
         elif access == "static":
             # Extract arguments from the stack
             args = [new_state.stack.pop() for _ in bc["method"]["args"]]
 
-            print(f"TODO: Spawn new abstract interpreter and collect return values")
+            signature = MethodSignature.from_bytecode(bc["method"])
 
-            # Append the retunr value to the stack
-            new_state.stack.append(SignSet.top())
+            new_state = AbstractState(
+                [{pc.next()}],
+                args
+            )
 
-            yield (pc.next(), new_state)
+            yield(PC(signature, 0), NextState(new_state))
         else:
             raise NotImplemented(f"can't handle {bc!r}")
 
@@ -144,7 +170,7 @@ class AbstractInterpreter:
 
         new_state.stack.extend(dup)
 
-        yield (pc.next(), new_state)
+        yield (pc.next(), NextState(new_state))
 
     def step_push(self, b: list, pc: PC, astate: AbstractState):
         new_state = astate.copy()
@@ -162,15 +188,23 @@ class AbstractInterpreter:
         else:
             new_state.stack.append(value)
         
-        yield (pc.next(), new_state)
+        yield (pc.next(), NextState(new_state))
 
-    def step_return(self, b: list, pc: PC, astate: AbstractState):
+    def step_return(self, b: list, pc: PC, astate: AbstractState) -> Iterable[Tuple[PC, ReturnValue]]:
         new_state = astate.copy()
 
-        print(f"TODO: Store return value in new_state.done")
-        new_state.done = "ok"
+        param_count = len(pc.signature.parameters)
 
-        yield (-1, new_state)
+        if b["type"] is not None:
+            return_value = new_state.stack.pop()
+            targets: Set[PC] = new_state.stack.pop()
+
+            for target in targets:
+                yield (target, ReturnValue(return_value, param_count))
+        
+        else:
+            yield (-1, ReturnValue(None, param_count))
+            
 
     # Stepping functions are now generators that can generate different 
     # states depending on the abstract state.
@@ -180,9 +214,9 @@ class AbstractInterpreter:
         # Note that the abstract value might both compare and not compare to 0
         for b in self.arithmetic.compare(bc["condition"], left, SignSet({'0'})):
             if b:
-                yield (pc.jump(bc["target"]), astate.copy())
+                yield (pc.jump(bc["target"]), NextState(astate.copy()))
             else:
-                yield (pc.next(), astate.copy())
+                yield (pc.next(), NextState(astate.copy()))
     
     def step_if(self, bc: list, pc: PC, astate: AbstractState):
         right = astate.stack.pop()
@@ -190,9 +224,9 @@ class AbstractInterpreter:
 
         for b in self.arithmetic.compare(bc["condition"], left, right):
             if b:
-                yield (pc.jump(bc["target"]), astate.copy())
+                yield (pc.jump(bc["target"]), NextState(astate.copy()))
             else:
-                yield (pc.next(), astate.copy())
+                yield (pc.next(), NextState(astate.copy()))
 
     def step_new(self, bc: list, pc: PC, astate: AbstractState):
         new_state = astate.copy()
@@ -202,14 +236,14 @@ class AbstractInterpreter:
         else:
             raise NotImplementedError(f"can't handle {bc!r}")
 
-        yield (pc.next(), new_state)
+        yield (pc.next(), NextState(new_state))
 
     def step_get(self, bc: list, pc: PC, astate: AbstractState):
         new_state = astate.copy()
 
         new_state.stack.append(BoolSet(False))
 
-        yield (pc.next(), new_state)
+        yield (pc.next(), NextState(new_state))
 
 
 def generate_arguments(params: list[JvmType]):

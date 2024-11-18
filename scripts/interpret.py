@@ -19,6 +19,10 @@ def main():
         print(f"Running test: {method.signature}")
         print("-------------------------")
 
+        if method.name != "testFactorial":
+            print("Skipping")
+            continue
+
         interpreter = AbstractInterpreter(
             program=program,
             arithmetic= SignArithmetic()
