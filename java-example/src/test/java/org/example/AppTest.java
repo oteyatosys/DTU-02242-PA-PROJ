@@ -1,18 +1,18 @@
 package org.example;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
 public class AppTest {
 
     @Test
     public static void testThruth( ){
-        assertTrue( true );
+        assert true;
     }
 
     @Test
     public static void testFail( ){
-        assertTrue( false );
+        assert false;
     }
 
     @Test
@@ -31,16 +31,16 @@ public class AppTest {
 
     @Test
     public void testGetInt( ){
-        assertEquals(42, App.getNum());
+        assert 42 == App.getNum();
     }
 
     @Test
     public void testRepeat( ){
-        assertEquals("HelloHelloHello", App.repeat("Hello", 3));
+        assert "HelloHelloHello".equals(App.repeat("Hello", 3));
     }
 
     @Test
     public void testStringEquality( ){
-        assertEquals("hejsa", "hallo");
+        assert "hejsa".equals("hallo");
     }
 }
