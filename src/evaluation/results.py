@@ -194,9 +194,28 @@ class TestSuiteResult:
         
         return 2 * (total_precision * total_recall) / denominator
     
+    def compute_average_time_taken_by_stage(self) -> float:
+        total_time_taken = self.compute_total_time_taken() 
+        stage_count = 0
+        for scenario_result in self.scenario_results:
+            stage_count += len(scenario_result.stage_results)
+
+        return total_time_taken / stage_count
+    
+    def compute_average_time_taken_variance_by_stage(self) -> float:
+        average_time_taken = self.compute_average_time_taken_by_stage()
+        total_variance = 0.0
+        stage_count = 0
+        for scenario_result in self.scenario_results:
+            for stage_result in scenario_result.stage_results:
+                total_variance += (stage_result.time_taken - average_time_taken) ** 2
+                stage_count += 1
+
+        return total_variance / stage_count
+
     def print_stats(self):
         print(f"Total time taken: {self.compute_total_time_taken()}")
-        print(f"Average time taken: {self.compute_average_time_taken()}")
+        print(f"Average time taken: {self.compute_average_time_taken_by_stage()}")
         print(f"Total true positives: {self.compute_total_true_positive_count()}")
         print(f"Total false positives: {self.compute_total_false_positive_count()}")
         print(f"Total false negatives: {self.compute_total_false_negative_count()}")
