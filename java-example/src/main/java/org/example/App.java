@@ -35,4 +35,29 @@ public class App {
     public static void main( String[] args ){
         System.out.println( getGreeting("Yo", "World") );
     }
+
+    public static int someLoops(){
+        int i = 0;
+        while (i < 1000000) i++;
+        return i;
+    }
+
+    public static int complexFunction(int i){
+        return add5(getNum()*i);
+    }
+
+    public static int inefficientFunction(int i){
+        if (i < 1) return 0;
+        else if (i == 1) return 1;
+        else return inefficientFunction(i-1) + inefficientFunction(i-2);
+    }
+
+    public static int callingInefficientFunction(){
+        return inefficientFunction(40);
+    }
+    
+    public static int isN238(int n){
+        if (n == 238) return 100;
+        else return 0;
+    }
 }
