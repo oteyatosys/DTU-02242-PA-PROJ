@@ -8,6 +8,9 @@ class MethodSignature:
     return_type: str
     parameters: tuple[str]
 
+    def __lt__(self, other: 'MethodSignature') -> bool:
+        return str(self) < str(other)
+
     @staticmethod
     def from_class_method(
         class_name: str,
