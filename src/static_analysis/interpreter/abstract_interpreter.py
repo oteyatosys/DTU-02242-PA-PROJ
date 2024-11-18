@@ -65,8 +65,10 @@ class AbstractInterpreter:
                         next_state = astate
                     case ReturnValue(value, param_count):
                         next_state = states.get(next_pc.prev()).copy()
-                        next_state = next_state.copy()
-                        next_state.stack = next_state.stack[:-param_count]
+
+                        if param_count > 0:
+                            next_state.stack = next_state.stack[:-param_count]
+                        
                         next_state.stack.append(value)
 
  
@@ -172,7 +174,7 @@ class AbstractInterpreter:
 
             yield(PC(signature, 0), NextState(new_state))
         else:
-            raise NotImplemented(f"can't handle {bc!r}")
+            raise NotImplementedError(f"can't handle {access!r}")
 
     def step_dup(self, bc: list, pc: PC, astate: AbstractState):
         new_state = astate.copy()
@@ -210,7 +212,11 @@ class AbstractInterpreter:
 
         if b["type"] is not None:
             return_value = new_state.stack.pop()
-            targets: Set[PC] = new_state.stack.pop()
+            try:
+                targets: Set[PC] = new_state.stack.pop()
+            except IndexError:
+                yield (-1, ReturnValue(return_value, param_count))
+                return
 
             for target in targets:
                 yield (target, ReturnValue(return_value, param_count))
