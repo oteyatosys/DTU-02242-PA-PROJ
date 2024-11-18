@@ -4,6 +4,7 @@ from static_analysis.interpreter.abstractions import AbstractState, BoolSet, Sig
 from static_analysis.interpreter.arithmetic.arithmetic import Arithmetic
 from reader import Program, MethodSignature
 from jpamb_utils import JvmType
+import logging as l
 
 @dataclass(frozen=True)
 class NextState:
@@ -76,17 +77,17 @@ class AbstractInterpreter:
                 if old != new_state:
                     states[next_pc] = new_state
                     needs_work.append(next_pc)
-                    print(f"New state at {next_pc}")
+                    l.debug(f"New state at {next_pc}")
 
         print(f"Generated {self.generated} states")
         self.pcs.update(states.keys())
-        print(f"Final states: {sorted(states.keys())}")
+        l.debug(f"Final states: {sorted(states.keys())}")
 
 
     def step(self, pc: PC, astate: AbstractState) -> Iterable[Tuple[PC, Action]]:
         bc = self.program.method(pc.signature).bytecode[pc.offset]
 
-        print(f"Running: ${bc['opr']}")
+        l.debug(f"Running: {bc['opr']}")
 
         for (pc_, s_) in self.lookup(f"step_{bc['opr']}")(bc, pc, astate):
             pc_: PC
