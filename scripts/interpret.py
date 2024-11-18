@@ -31,10 +31,10 @@ def main():
         pc = PC(method.signature, 0)
         initial_state = AbstractState([], [])
 
-        interpreter.analyse(pc, initial_state)
+        touched = interpreter.analyse(pc, initial_state)
 
         print(f"End states: {interpreter.final}")
-        print(f"PCs run: {interpreter.pcs}")
+        print(f"Touched: {touched}")
 
 
 if __name__ == "__main__":

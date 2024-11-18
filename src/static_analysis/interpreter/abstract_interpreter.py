@@ -47,9 +47,8 @@ class AbstractInterpreter:
         self.arithmetic = arithmetic
         self.generated = 0
         self.final = set()
-        self.pcs = set()
 
-    def analyse(self, pc: PC, initial_state: AbstractState):
+    def analyse(self, pc: PC, initial_state: AbstractState) -> Dict[MethodSignature, Set[int]]:
         states: Dict[PC, AbstractState] = {pc: initial_state}
         needs_work: List[PC] = [pc]
 
@@ -80,9 +79,14 @@ class AbstractInterpreter:
                     l.debug(f"New state at {next_pc}")
 
         print(f"Generated {self.generated} states")
-        self.pcs.update(states.keys())
-        l.debug(f"Final states: {sorted(states.keys())}")
 
+        touched = dict()
+        for pc in states.keys():
+            pcs = touched.get(pc.signature, set())
+            pcs.add(pc.offset)
+            touched[pc.signature] = pcs
+        
+        return touched
 
     def step(self, pc: PC, astate: AbstractState) -> Iterable[Tuple[PC, Action]]:
         bc = self.program.method(pc.signature).bytecode[pc.offset]
