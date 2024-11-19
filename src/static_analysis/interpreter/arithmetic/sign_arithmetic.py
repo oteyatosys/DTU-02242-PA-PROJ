@@ -121,6 +121,9 @@ class SignArithmetic(Arithmetic[SignSet]):
         if a == "0" and b == "0":
             return BoolSet( True )
         
+        if a != b:
+            return BoolSet( False )
+
         return BoolSet( True, False )
     
     def _ne (self, a: Sign, b: Sign) -> BoolSet:
