@@ -9,27 +9,36 @@ AbstractValue = Union[SignSet, BoolSet]
 @dataclass
 class AbstractState:
     stack: list[AbstractValue]
-    locals: list[AbstractValue]
+    locals: dict[int, AbstractValue]
     done: str = None
 
     def __le__(self, other: 'AbstractState') -> bool:
         self.ensure_compatability(other)
-        stack_le = all(s1 <= s2 for s1, s2 in zip(self.stack, other.stack, fillvalue=set()))
-        locals_le = all(l1 <= l2 for l1, l2 in zip(self.locals, other.locals, fillvalue=set()))
+        stack_le = all(s1 <= s2 for s1, s2 in zip(self.stack, other.stack))
+        locals_le = all(
+            self.locals.get(key) <= other.locals.get(key)
+            for key in set(self.locals) | set(other.locals)
+        )
         return stack_le and locals_le
 
     # Meet operation
     def __and__(self, other: 'AbstractState') -> 'AbstractState':
         self.ensure_compatability(other)
         stack_meet = [s1 & s2 for s1, s2 in zip(other.stack, self.stack)]
-        locals_meet = [l1 & l2 for l1, l2 in zip(other.locals, self.locals)]
+        locals_meet = {
+            key: self.locals.get(key) & other.locals.get(key)
+            for key in set(self.locals) | set(other.locals)
+        }
         return AbstractState(stack=stack_meet, locals=locals_meet)
     
     # Join operation
     def __or__(self, other: 'AbstractState') -> 'AbstractState':
         self.ensure_compatability(other)
         stack_join = [s1 | s2 for s1, s2 in zip(other.stack, self.stack)]
-        locals_join = [l1 | l2 for l1, l2 in zip(other.locals, self.locals)]
+        locals_join = {
+            key: self.locals.get(key) | other.locals.get(key)
+            for key in set(self.locals) | set(other.locals)
+        }
         return AbstractState(stack=stack_join, locals=locals_join)
 
     def copy(self):
@@ -57,7 +66,7 @@ class AbstractState:
 
     @staticmethod
     def bot():
-        return AbstractState([], [])
+        return AbstractState([], {})
     
 
     

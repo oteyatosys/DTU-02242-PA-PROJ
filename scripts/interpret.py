@@ -32,7 +32,7 @@ def main():
         )
 
         pc = PC(method.signature, 0)
-        initial_state = AbstractState([], [])
+        initial_state = AbstractState([], {})
 
         touched = interpreter.analyse(pc, initial_state)
 

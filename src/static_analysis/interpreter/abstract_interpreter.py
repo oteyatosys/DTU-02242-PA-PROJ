@@ -145,10 +145,23 @@ class AbstractInterpreter:
 
         yield (pc.next(), NextState(new_state))
 
+
+    def step_store(self, bc: list, pc: PC, astate: AbstractState):
+        new_state = astate.copy()
+
+        index: int = bc["index"]
+
+        new_state.locals[index] = new_state.stack.pop()
+
+        yield (pc.next(), NextState(new_state))
+        
+
     def step_throw(self, bc: list, pc: PC, astate: AbstractState):
         new_state = astate.copy()
 
         error: object = next(iter(new_state.stack.pop()))
+
+        print(f"Throwing {error}")
 
         new_state.done = error
 
@@ -163,9 +176,11 @@ class AbstractInterpreter:
             yield (pc.next(), NextState(astate))
         elif access == "static":
             # Extract arguments from the stack
-            args = [new_state.stack.pop() for _ in bc["method"]["args"]]
-
             signature = MethodSignature.from_bytecode(bc["method"])
+
+            args = dict(
+                enumerate(astate.stack[-len(signature.parameters):])
+            ) if len(signature.parameters) > 0 else dict()
 
             new_state = AbstractState(
                 [{pc.next()}],
