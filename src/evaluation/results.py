@@ -9,7 +9,9 @@ from reader.method_signature import MethodSignature
 class TestStageResult:
     predicted: Set[MethodSignature]
     ground_truth: Set[MethodSignature]
-    time_taken: float = 0.0
+    found_ground_truth: Set[MethodSignature]
+    prediction_time: float = 0.0
+    test_time: float = 0.0
 
     def compute_true_positives(self) -> Set[MethodSignature]:
         return self.predicted & self.ground_truth
@@ -51,7 +53,7 @@ class TestStageResult:
         return 2 * (precision * recall) / (precision + recall)
     
     def print_stats(self):
-        print(f"Time taken: {self.time_taken}")
+        print(f"Time taken: {self.prediction_time}")
         print(f"True positives: {self.compute_true_positives_count()}")
         print(f"False positives: {self.compute_false_positives_count()}")
         print(f"False negatives: {self.compute_false_negatives_count()}")
@@ -68,11 +70,21 @@ class TestScenarioResult:
     def compute_total_time_taken(self) -> float:
         total_time_taken = 0.0
         for stage_result in self.stage_results:
-            total_time_taken += stage_result.time_taken
+            total_time_taken += stage_result.prediction_time
         return total_time_taken
     
     def compute_average_time_taken(self) -> float:
         total_time_taken = self.compute_total_time_taken() 
+        return total_time_taken / len(self.stage_results)
+    
+    def compute_total_test_time_taken(self) -> float:
+        total_time_taken = 0.0
+        for stage_result in self.stage_results:
+            total_time_taken += stage_result.test_time
+        return total_time_taken
+    
+    def compute_average_test_time_taken(self) -> float:
+        total_time_taken = self.compute_total_test_time_taken() 
         return total_time_taken / len(self.stage_results)
     
     def compute_total_true_positive_count(self) -> int:
@@ -202,20 +214,44 @@ class TestSuiteResult:
 
         return total_time_taken / stage_count
     
+    def compute_average_test_time_taken_by_stage(self) -> float:
+        total_time_taken = 0.0
+        stage_count = 0
+        for scenario_result in self.scenario_results:
+            for stage_result in scenario_result.stage_results:
+                total_time_taken += stage_result.test_time
+                stage_count += 1
+
+        return total_time_taken / stage_count
+
     def compute_average_time_taken_variance_by_stage(self) -> float:
         average_time_taken = self.compute_average_time_taken_by_stage()
         total_variance = 0.0
         stage_count = 0
         for scenario_result in self.scenario_results:
             for stage_result in scenario_result.stage_results:
-                total_variance += (stage_result.time_taken - average_time_taken) ** 2
+                total_variance += (stage_result.prediction_time - average_time_taken) ** 2
+                stage_count += 1
+
+        return total_variance / stage_count
+
+    def compute_average_test_time_taken_variance_by_stage(self) -> float:
+        average_time_taken = self.compute_average_test_time_taken_by_stage()
+        total_variance = 0.0
+        stage_count = 0
+        for scenario_result in self.scenario_results:
+            for stage_result in scenario_result.stage_results:
+                total_variance += (stage_result.test_time - average_time_taken) ** 2
                 stage_count += 1
 
         return total_variance / stage_count
 
     def print_stats(self):
         print(f"Total time taken: {self.compute_total_time_taken()}")
-        print(f"Average time taken: {self.compute_average_time_taken_by_stage()}")
+        print(f"Average time taken by stage: {self.compute_average_time_taken_by_stage()}")
+        print(f"Average time taken by stage variance: {self.compute_average_time_taken_variance_by_stage()}")
+        print(f"Average test time taken by stage: {self.compute_average_test_time_taken_by_stage()}")
+        print(f"Average test time taken by stage variance: {self.compute_average_test_time_taken_variance_by_stage()}")
         print(f"Total true positives: {self.compute_total_true_positive_count()}")
         print(f"Total false positives: {self.compute_total_false_positive_count()}")
         print(f"Total false negatives: {self.compute_total_false_negative_count()}")
