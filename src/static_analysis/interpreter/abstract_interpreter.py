@@ -47,6 +47,7 @@ class AbstractInterpreter:
         self.arithmetic = arithmetic
         self.generated = 0
         self.final = set()
+        self.errors = set()
 
     def analyse(self, pc: PC, initial_state: AbstractState) -> Dict[MethodSignature, Set[int]]:
         states: Dict[PC, AbstractState] = {pc: initial_state}
@@ -79,6 +80,7 @@ class AbstractInterpreter:
                     states[next_pc] = new_state
                     needs_work.append(next_pc)
                     l.debug(f"New state at {next_pc}")
+                    l.debug(f"new: {new_state}")
 
         print(f"Generated {self.generated} states")
 
@@ -126,6 +128,7 @@ class AbstractInterpreter:
             yield (pc.next(), NextState(new_state))
         except ZeroDivisionError:
             new_state.done = "zero division"
+            self.errors.add("zero division")
             yield (-1, NextState(new_state))
 
             right -= SignSet({'0'})
@@ -247,6 +250,7 @@ class AbstractInterpreter:
         left = astate.stack.pop()
         # Note that the abstract value might both compare and not compare to 0
         for b in self.arithmetic.compare(bc["condition"], left, SignSet({'0'})):
+            l.debug(f"Comparing {left} to 0 {bc['condition']}: {b}")
             if b:
                 yield (pc.jump(bc["target"]), NextState(astate.copy()))
             else:
@@ -267,6 +271,7 @@ class AbstractInterpreter:
 
         if bc["class"] == "java/lang/AssertionError":
             new_state.stack.append(frozenset(["assertion error"]))
+            self.errors.add("assertion error")
         else:
             raise NotImplementedError(f"can't handle {bc!r}")
 
