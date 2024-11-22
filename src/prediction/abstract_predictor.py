@@ -20,12 +20,16 @@ class AbstractPredictor(TestPredictor):
             return [self._remove_offsets(item) for item in bytecode]
         return bytecode
 
+
     def _add_offsets(self, changed_bc: dict[MethodSignature, Set[int]], signature: MethodSignature, changed: Set[int]):
         if signature not in changed_bc:
             changed_bc[signature] = set()
         changed_bc[signature].update(changed)
 
+    
     def predict(self, old_program, new_program):
+        # Find prediction candidates and changed bytecode
+
         call_graph: CallGraph = build_call_graph(old_program)
 
         changed_bc: dict[MethodSignature, Set[int]] = {}
@@ -69,6 +73,8 @@ class AbstractPredictor(TestPredictor):
         for _, method in new_program.all_test_methods():         
             call_graph.bfs_walk(method.signature, walk_callgraph)
 
+        # Analyse prediction candidates
+
         test_predictions: Set[MethodSignature] = set()
 
         arithmetic = SignArithmetic()
@@ -82,6 +88,9 @@ class AbstractPredictor(TestPredictor):
             initial_state = AbstractState([], {})
 
             touched = interpreter.analyse(pc, initial_state)
+
+            if len(interpreter.errors) <= 0:
+                continue
 
             for signature, offsets in touched.items():
                 if not signature in changed_bc:
