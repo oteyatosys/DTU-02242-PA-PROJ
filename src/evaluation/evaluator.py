@@ -46,7 +46,7 @@ class Evaluator:
     ) -> TestScenarioResult:
         maven_project = test_scenario.maven_project
 
-        reset_data(maven_project)
+        reset_data(maven_project, data_dir)
 
         stage_results: List[TestStageResult] = []
 
@@ -67,7 +67,7 @@ class Evaluator:
 
         stage.apply_changes(src_dir)
         
-        perform_data_rotation(maven_project)
+        perform_data_rotation(maven_project, data_dir)
 
         start_time = timer()
         
@@ -128,7 +128,7 @@ class Evaluator:
                         classname.replace(".", "/"),
                         name, "void", ()
                     )
-                    
+
                     results.append((signature, status))
         return results
 

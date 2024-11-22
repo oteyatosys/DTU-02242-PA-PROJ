@@ -5,14 +5,6 @@ import shutil
 import subprocess
 import sys
 
-project_root = Path(__file__).parent.parent.parent
-os.chdir(project_root)
-
-data_dir = project_root / "data"
-tmp_dir = data_dir / "tmp"
-new_dir = data_dir / "new"
-old_dir = data_dir / "old"
-
 # Set the path to the jvm2json command (if not set already)
 JVM2JSON_PATH = os.getenv("JVM2JSON_PATH", "jvm2json/result/bin/jvm2json")
 
@@ -42,7 +34,11 @@ def convert_classes_to_json(src_dir, dest_dir):
         with open(out_file, "w") as out_f:
             json.dump(json_data, out_f, indent=4)
 
-def perform_data_rotation(maven_project: Path):
+def perform_data_rotation(maven_project: Path, data_dir: Path):
+    tmp_dir = data_dir / "tmp"
+    new_dir = data_dir / "new"
+    old_dir = data_dir / "old"
+
     shutil.rmtree(tmp_dir, ignore_errors=True)
 
     try:
@@ -77,7 +73,8 @@ def perform_data_rotation(maven_project: Path):
         # Cleanup tmp directory
         shutil.rmtree(tmp_dir, ignore_errors=True)
 
-def reset_data(maven_project: Path):
+
+def reset_data(maven_project: Path, data_dir: Path):
     shutil.rmtree(data_dir, ignore_errors=True)
 
-    perform_data_rotation(maven_project)
+    perform_data_rotation(maven_project, data_dir)
