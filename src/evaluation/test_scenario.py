@@ -159,9 +159,8 @@ class ReplaceLines(DecomposableChange):
         ]
 
 class TestStage:
-    def __init__(self, changes: List[Union[Change, DecomposableChange]] = [], ground_truth: Set[MethodSignature] = set()):
-        self.ground_truth: Set[MethodSignature] = set()
-        self.ground_truth.update(ground_truth)
+    def __init__(self, changes: List[Union[Change, DecomposableChange]] = [], ground_truth: Set[MethodSignature] = None):
+        self.ground_truth: Set[MethodSignature] = ground_truth
 
         self.changes: List[Change] = []
         for change in changes:
