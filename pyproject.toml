@@ -13,6 +13,7 @@ dependencies = [
     "tree-sitter>=0.23.2",
     "tree-sitter-java>=0.23.2",
     "jsondiff>=2.2.1",
+    "tqdm>=4.67.0",
 ]
 requires-python = "==3.13.*"
 readme = "README.md"
