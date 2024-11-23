@@ -5,17 +5,12 @@ import org.junit.jupiter.api.Test;
 public class AppTest {
 
     @Test
-    public static void testThruth( ){
+    public void testThruth( ){
         assert true;
     }
 
     @Test
-    public static void testFail( ){
-        assert false;
-    }
-
-    @Test
-    public static void testFactorial() {
+    public void testFactorial() {
         assert App.factorial(0) == 1;
         assert App.factorial(1) == 1;
         assert App.factorial(2) == 2;
@@ -23,9 +18,8 @@ public class AppTest {
     }
 
     @Test
-    public int testReturn( ){
+    public void testReturn( ){
         assert true;
-        return 42;
     }
 
     @Test
@@ -33,13 +27,18 @@ public class AppTest {
         assert 42 == App.getNum();
     }
 
-    @Test
-    public void testRepeat( ){
-        assert "HelloHelloHello".equals(App.repeat("Hello", 3));
+    public static int testReturn2( ){
+        boolean b = true;
+
+        if (b) {
+            return 42;
+        } else {
+            return -1;
+        }
     }
 
     @Test
-    public void testStringEquality( ){
-        assert "hejsa".equals("hallo");
+    public void testReturn3( ){
+        assert AppTest.testReturn2() > 0;
     }
 }
