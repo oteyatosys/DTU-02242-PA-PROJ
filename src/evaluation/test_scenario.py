@@ -158,6 +158,41 @@ class ReplaceLines(DecomposableChange):
             )
         ]
 
+# This class is not very nice, because it also requires the actual path to the file
+@dataclass
+class FindReplaceFirst(DecomposableChange):
+    file_path: Path
+    actual_path: Path
+    search_line: str
+    new_content: str
+    delelete_following: int = 0
+    _replace_lines: ReplaceLines = field(init=False)
+
+    def __post_init__(self):
+        # find line index of the line to replace
+        
+        # read the file
+        with open(self.actual_path, 'r') as f:
+            lines = f.readlines()
+        
+        # find the line index
+        line_index = -1
+        for i, line in enumerate(lines):
+            # Only has to match part of the line
+            if self.search_line in line:
+                line_index = i + 1
+                break
+
+        self._replace_lines = ReplaceLines(
+            file_path=self.file_path,
+            line_range=(line_index, line_index + self.delelete_following),
+            new_content=self.new_content
+        )
+
+    def decompose(self) -> List[Addition|Deletion]:
+        return self._replace_lines.decompose()
+
+
 class TestStage:
     def __init__(self, changes: List[Union[Change, DecomposableChange]] = [], ground_truth: Set[MethodSignature] = None):
         self.ground_truth: Set[MethodSignature] = ground_truth
