@@ -82,7 +82,7 @@ class AbstractInterpreter:
                     l.debug(f"New state at {next_pc}")
                     l.debug(f"new: {new_state}")
 
-        print(f"Generated {self.generated} states")
+        l.debug(f"Generated {self.generated} states")
 
         touched = dict()
         for pc in states.keys():
