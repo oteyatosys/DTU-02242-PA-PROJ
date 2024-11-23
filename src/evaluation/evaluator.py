@@ -17,12 +17,9 @@ from timeit import default_timer as timer
 import os
 from xml.etree import ElementTree as ET
 import tempfile
+import tqdm
 
 l.basicConfig(level=l.INFO)
-
-data_dir = Path("data")
-new_dir = data_dir / "new"
-old_dir = data_dir / "old"
 
 @dataclass
 class Evaluator:
@@ -33,10 +30,13 @@ class Evaluator:
     ) -> TestSuiteResult:
 
         results: List[TestScenarioResult] = []
-        
+
+        total_stages = sum(len(scenario.stages) for scenario in test_suite.scenarios)
+        progress_bar = tqdm.tqdm(total=total_stages, desc="Scenarios", position=0)
+
         with ThreadPoolExecutor(max_workers=8) as executor:
             future_to_scenario = {
-                executor.submit(self.evaluate_scenario, predictor, scenario): scenario
+                executor.submit(self.evaluate_scenario, predictor, scenario, progress_bar): scenario
                 for scenario in test_suite.scenarios
             }
 
@@ -47,6 +47,8 @@ class Evaluator:
                 except Exception as e:
                     l.error(f"Error evaluating scenario: {e}")
         
+        progress_bar.close()
+
         return TestSuiteResult(
             results
         )
@@ -55,6 +57,7 @@ class Evaluator:
         self, 
         predictor: TestPredictor,
         test_scenario: TestScenario,
+        progress_bar: tqdm.tqdm
     ) -> TestScenarioResult:
         maven_project = test_scenario.maven_project
 
@@ -74,6 +77,7 @@ class Evaluator:
                 stage_results.append(
                     self.evaluate_stage(predictor, stage, maven_project_copy, data_dir)
                 )
+                progress_bar.update(1)
 
             return TestScenarioResult(stage_results)
 
@@ -84,6 +88,8 @@ class Evaluator:
         maven_project: Path,
         data_dir: Path
     ) -> TestStageResult:
+        old_dir = data_dir / "old"
+        new_dir = data_dir / "new"
         src_dir = maven_project / "src/main/java"
 
         stage.apply_changes(src_dir)
