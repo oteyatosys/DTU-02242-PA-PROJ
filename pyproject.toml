@@ -30,6 +30,7 @@ distribution = true
 prepare = {call = "scripts.prepare:main"}
 analyse = {call = "scripts.analyse:main"}
 interpret = {call = "scripts.interpret:main"}
+evaluate = {call = "scripts.evaluate:main"}
 
 [tool.pytest.ini_options]
 pythonpath = [
