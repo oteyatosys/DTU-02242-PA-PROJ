@@ -2,9 +2,10 @@ from dataclasses import dataclass
 from typing import Union
 
 from static_analysis.interpreter.abstractions.bool_set import BoolSet
+from static_analysis.interpreter.abstractions.itval import Interval
 from static_analysis.interpreter.abstractions.sign_set import SignSet
 
-AbstractValue = Union[SignSet, BoolSet]
+AbstractValue = Union[SignSet, BoolSet, Interval]
 
 @dataclass
 class AbstractState:
@@ -62,7 +63,29 @@ class AbstractState:
             raise ValueError("Stacks must be of the same length")
         if len(self.locals) != len(other.locals):
             raise ValueError("Locals must be of the same length")
+    
+    def widening(self, K: set[int], other: 'AbstractState') -> 'AbstractState':
+        self.ensure_compatability(other)
         
+        stack_widening = []
+        for s1, s2 in zip(self.stack, other.stack):
+            match s1, s2:
+                case (Interval(), Interval()):
+                    stack_widening.append(s1.widening(K, s2))
+                case _:
+                    stack_widening.append(s1 | s2)
+
+        locals_widening = {}
+        for key in set(self.locals) | set(other.locals):
+            s1 = self.locals.get(key)
+            s2 = other.locals.get(key)
+            match s1, s2:
+                case (Interval(), Interval()):
+                    locals_widening[key] = s1.widening(K, s2)
+                case _:
+                    locals_widening[key] = s1 | s2
+
+        return AbstractState(stack=stack_widening, locals=locals_widening)
 
     @staticmethod
     def bot():

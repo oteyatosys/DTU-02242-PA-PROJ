@@ -1,6 +1,7 @@
 from dataclasses import dataclass
-from typing import List, Set, Tuple, TypeAlias, Literal
+from typing import TypeAlias
 
+from static_analysis.interpreter.abstractions.bool_set import BoolSet
 
 
 Boundary : TypeAlias = float | int
@@ -13,7 +14,11 @@ class Interval():
         return (self.lb >= other.lb and self.ub <= other.ub)
     
     def __and__(self, other: 'Interval') -> 'Interval':
-        return Interval(max(self.lb,other.lb),min(self.ub,other.ub))
+        lower_bounds = max(self.lb,other.lb)
+        upper_bounds = min(self.ub,other.ub)
+        if lower_bounds > upper_bounds :
+            return Interval.bot()
+        return Interval(lower_bounds,upper_bounds)
     
     def __or__(self, other: 'Interval') -> 'Interval':
         if isinstance(other, set):
@@ -23,19 +28,26 @@ class Interval():
     def __contains__(self, member: int):
         return (self.lb <= member and member <= self.ub)
     
+    def __str__(self):
+        return f"[{self.lb}, {self.ub}]"
+    
     def widening(self, K : set[int], other: 'Interval'):
+        if isinstance(other, set):
+            other = Interval.bot()
         lower_bounds = max((k for k in K if k <= min(self.lb,other.lb)), default=float("-inf"))
         upper_bounds = min((k for k in K if k >= max(self.ub,other.ub)), default=float("inf"))
         return Interval(lower_bounds,upper_bounds)
         
-    def __eq__(self, other):
-        return (self.lb == other.lb and self.ub == other.ub)
+    def __eq__(self, value):
+        if not(isinstance(value,Interval)):
+            return False
+        return self.lb == value.lb and self.ub == value.ub
     
     def __repr__(self):
-        return super().__repr__()
+        return f"[{self.lb}, {self.ub}]"
     
     def __hash__(self):
-        return super().__hash__()
+        return hash((self.lb, self.ub))
     
     @staticmethod
     def abstract(items: set[int]):
@@ -49,6 +61,16 @@ class Interval():
     @staticmethod
     def top() -> 'Interval':
         return Interval(float("-inf"),float("inf"))
-
-
     
+    @staticmethod
+    def from_boolset(boolset: BoolSet) -> 'Interval':
+        lb: Boundary = float("inf")
+        ub: Boundary = float("-inf")
+        for value in boolset:
+            if value:
+                lb = min(lb, 1)
+                ub = max(ub, 1)
+            else:
+                lb = min(lb, 0)
+                ub = max(ub, 0)
+        return Interval(lb, ub)
