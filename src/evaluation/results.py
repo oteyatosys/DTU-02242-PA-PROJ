@@ -219,8 +219,15 @@ class TestSuiteResult:
         stage_count = 0
         for scenario_result in self.scenario_results:
             for stage_result in scenario_result.stage_results:
+                # Skip stages that whose test time was not recorded
+                if stage_result.test_time is None:
+                    continue
+
                 total_time_taken += stage_result.test_time
                 stage_count += 1
+
+        if stage_count == 0:
+            return None
 
         return total_time_taken / stage_count
 
@@ -237,6 +244,10 @@ class TestSuiteResult:
 
     def compute_average_test_time_taken_variance_by_stage(self) -> float:
         average_time_taken = self.compute_average_test_time_taken_by_stage()
+
+        if average_time_taken is None:
+            return None
+
         total_variance = 0.0
         stage_count = 0
         for scenario_result in self.scenario_results:
