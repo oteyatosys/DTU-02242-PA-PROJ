@@ -23,6 +23,8 @@ l.basicConfig(level=l.INFO)
 
 @dataclass
 class Evaluator:
+    max_workers: int = 16
+
     def evaluate_suite(
         self,
         predictor: TestPredictor,
@@ -34,7 +36,7 @@ class Evaluator:
         total_stages = sum(len(scenario.stages) for scenario in test_suite.scenarios)
         progress_bar = tqdm.tqdm(total=total_stages, desc="Scenarios", position=0)
 
-        with ThreadPoolExecutor(max_workers=8) as executor:
+        with ThreadPoolExecutor(max_workers = self.max_workers) as executor:
             future_to_scenario = {
                 executor.submit(self.evaluate_scenario, predictor, scenario, progress_bar): scenario
                 for scenario in test_suite.scenarios
