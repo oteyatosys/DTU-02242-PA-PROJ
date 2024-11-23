@@ -23,7 +23,7 @@ l.basicConfig(level=l.INFO)
 
 @dataclass
 class Evaluator:
-    max_workers: int = 16
+    max_workers: int = 8
 
     def evaluate_suite(
         self,
