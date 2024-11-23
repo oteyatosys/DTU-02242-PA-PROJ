@@ -176,8 +176,15 @@ class TestSuiteResult:
 
         return total_variance / stage_count
 
+    def compute_total_stage_count(self) -> int:
+        stage_count = 0
+        for scenario_result in self.scenario_results:
+            stage_count += len(scenario_result.stage_results)
+        return stage_count
+
     def print_stats(self):
         print(f"Total time taken: {self.compute_total_prediction_time()}")
+        print(f"Total stage count: {self.compute_total_stage_count()}")
         print(f"Mean prediction time: {self.compute_mean_prediction_time()}")
         print(f"Prediction time variance: {self.compute_prediction_time_variance()}")
         print(f"Mean test time: {self.compute_mean_test_time()}")
