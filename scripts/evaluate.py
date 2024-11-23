@@ -1,17 +1,20 @@
 
 from pathlib import Path
 from evaluation.evaluator import Evaluator
+from evaluation.results import TestSuiteResult
 from evaluation.test_scenario import ReplaceLines, TestScenario, TestStage, TestSuite
-from prediction.call_graph_predictor import CallGraphPredictor
+from prediction.abstract_predictor import AbstractPredictor
 from prediction.predictor import TestPredictor
+import pickle
+
 from reader.method_signature import MethodSignature
 
-project_root = Path(__file__).parent.parent.parent
+project_root = Path(__file__).parent.parent
 
 def main():
     evaluator = Evaluator()
 
-    predictor: TestPredictor = CallGraphPredictor()
+    predictor: TestPredictor = AbstractPredictor()
 
     test_scenario1 = TestScenario(
         project_root / "java-example", [
@@ -31,15 +34,21 @@ def main():
         test_scenario1,
     ])
     
-    result = evaluator.evaluate_suite(predictor, test_suite)
+    result: TestSuiteResult = evaluator.evaluate_suite(predictor, test_suite)
 
     result.print_stats()
 
-    avg_time = result.compute_average_time_taken_by_stage()
-    print(f"Average time taken by stage: {avg_time}")
-    time_variance = result.compute_average_time_taken_variance_by_stage()
-    print(f"Average time taken variance by stage: {time_variance}")
+    with open("result.pkl", "wb") as f:
+        pickle.dump(result, f)
 
+def load_result():
+    with open("result.pkl", "rb") as f:
+        return pickle.load(f)
 
 if __name__ == "__main__":
     main()
+
+    # result: TestSuiteResult = load_result()
+
+    # result.print_stats()
+    
