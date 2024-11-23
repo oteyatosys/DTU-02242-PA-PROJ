@@ -1,7 +1,9 @@
 
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 import os
 from pathlib import Path
+import shutil
 import subprocess
 from typing import List, Set, Tuple
 from evaluation.results import TestScenarioResult, TestStageResult, TestSuiteResult
@@ -14,6 +16,7 @@ import logging as l
 from timeit import default_timer as timer
 import os
 from xml.etree import ElementTree as ET
+import tempfile
 
 l.basicConfig(level=l.INFO)
 
@@ -27,14 +30,23 @@ class Evaluator:
         self,
         predictor: TestPredictor,
         test_suite: TestSuite
-    ):
+    ) -> TestSuiteResult:
+
         results: List[TestScenarioResult] = []
+        
+        with ThreadPoolExecutor(max_workers=8) as executor:
+            future_to_scenario = {
+                executor.submit(self.evaluate_scenario, predictor, scenario): scenario
+                for scenario in test_suite.scenarios
+            }
 
-        for test_scenario in test_suite.scenarios:
-            results.append(
-                self.evaluate_scenario(predictor, test_scenario)
-            )
-
+            for future in as_completed(future_to_scenario):
+                try:
+                    result: TestScenarioResult = future.result()
+                    results.append(result)
+                except Exception as e:
+                    l.error(f"Error evaluating scenario: {e}")
+        
         return TestSuiteResult(
             results
         )
@@ -42,27 +54,36 @@ class Evaluator:
     def evaluate_scenario(
         self, 
         predictor: TestPredictor,
-        test_scenario: TestScenario
+        test_scenario: TestScenario,
     ) -> TestScenarioResult:
         maven_project = test_scenario.maven_project
 
-        reset_data(maven_project, data_dir)
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_dir = Path(tmp_dir)
 
-        stage_results: List[TestStageResult] = []
+            maven_project_copy = tmp_dir / maven_project.name
+            shutil.copytree(maven_project, maven_project_copy)
 
-        for stage in test_scenario.stages:
-            stage_results.append(
-                self.evaluate_stage(predictor, stage, maven_project)
-            )
+            data_dir = tmp_dir / "data"
 
-        return TestScenarioResult(stage_results)
+            reset_data(maven_project_copy, data_dir)
+
+            stage_results: List[TestStageResult] = []
+
+            for stage in test_scenario.stages:
+                stage_results.append(
+                    self.evaluate_stage(predictor, stage, maven_project_copy, data_dir)
+                )
+
+            return TestScenarioResult(stage_results)
 
     def evaluate_stage(
         self,
         predictor: TestPredictor,
         stage: TestStage,
-        maven_project: Path
-    ):
+        maven_project: Path,
+        data_dir: Path
+    ) -> TestStageResult:
         src_dir = maven_project / "src/main/java"
 
         stage.apply_changes(src_dir)
