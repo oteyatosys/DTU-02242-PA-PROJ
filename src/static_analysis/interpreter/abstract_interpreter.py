@@ -164,7 +164,7 @@ class AbstractInterpreter:
 
         error: object = next(iter(new_state.stack.pop()))
 
-        print(f"Throwing {error}")
+        self.errors.add(error)
 
         new_state.done = error
 
@@ -271,7 +271,6 @@ class AbstractInterpreter:
 
         if bc["class"] == "java/lang/AssertionError":
             new_state.stack.append(frozenset(["assertion error"]))
-            self.errors.add("assertion error")
         else:
             raise NotImplementedError(f"can't handle {bc!r}")
 
