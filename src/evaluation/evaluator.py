@@ -43,11 +43,8 @@ class Evaluator:
             }
 
             for future in as_completed(future_to_scenario):
-                try:
-                    result: TestScenarioResult = future.result()
-                    results.append(result)
-                except Exception as e:
-                    l.error(f"Error evaluating scenario: {e}")
+                result: TestScenarioResult = future.result()
+                results.append(result)
         
         progress_bar.close()
 
