@@ -4,7 +4,10 @@ T = TypeVar('T')
 
 class Arithmetic(Generic[T]):
     def binary(self, opr: str, a: T, b: T) -> T:
-        pass
+        raise NotImplementedError
 
     def compare(self, opr: str, a: T, b: T) -> bool:
-        pass
+        raise NotImplementedError
+
+    def negate(self, a: T) -> T:
+        raise NotImplementedError
