@@ -167,6 +167,15 @@ class ItAbstractInterpreter:
         else:
             raise NotImplementedError(f"can't handle {access!r}")
 
+    def step_negate(self, bc: list, pc: PC, astate: AbstractState):
+        new_state = astate.copy()
+
+        left = new_state.stack.pop()
+
+        new_state.stack.append(self.arithmetic.negate(left))
+
+        yield (pc.next(), NextState(new_state))
+
     def step_dup(self, bc: list, pc: PC, astate: AbstractState):
         new_state = astate.copy()
 
