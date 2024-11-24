@@ -194,6 +194,16 @@ class TestSuiteResult:
                 stage_count += 1
 
         return total_variance / stage_count
+    
+    def compute_test_time_std_deviation(self) -> float:
+        variance = self.compute_test_time_variance()
+        if variance is None:
+            return None
+        
+        return variance ** 0.5
+    
+    def compute_prediction_time_std_deviation(self) -> float:
+        return self.compute_prediction_time_variance() ** 0.5
 
     def compute_total_stage_count(self) -> int:
         stage_count = 0
@@ -205,12 +215,14 @@ class TestSuiteResult:
         print(f"===== Evaluation Results =====")
         print(f"-- Time --")
         print(f" Total stage count: {self.compute_total_stage_count()}")
-        print(f" Total evaluation time: {self.evaluation_time}")
-        print(f" Total prediction time: {self.compute_total_prediction_time()}")
-        print(f" Mean prediction time: {self.compute_mean_prediction_time()}")
+        print(f" Total evaluation time (s): {self.evaluation_time}")
+        print(f" Total prediction time (s): {self.compute_total_prediction_time()}")
+        print(f" Mean prediction time (s): {self.compute_mean_prediction_time()}")
         print(f" Prediction time variance: {self.compute_prediction_time_variance()}")
-        print(f" Mean test time: {self.compute_mean_test_time()}")
+        print(f" Prediction time std deviation: {self.compute_prediction_time_std_deviation()}")
+        print(f" Mean test time (s): {self.compute_mean_test_time()}")
         print(f" Test time variance: {self.compute_test_time_variance()}")
+        print(f" Test time std deviation: {self.compute_test_time_std_deviation()}")
         print(f"-- Confusion Matrix Metrics --")
         print(f" Total true positives: {self.compute_total_true_positive_count()}")
         print(f" Total false positives: {self.compute_total_false_positive_count()}")
