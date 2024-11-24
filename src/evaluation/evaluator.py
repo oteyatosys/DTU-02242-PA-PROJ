@@ -42,14 +42,19 @@ class Evaluator:
                 for scenario in test_suite.scenarios
             }
 
+            start = timer()
+
             for future in as_completed(future_to_scenario):
                 result: TestScenarioResult = future.result()
                 results.append(result)
+
+            end = timer()
         
         progress_bar.close()
 
         return TestSuiteResult(
-            results
+            results,
+            end - start
         )
 
     def evaluate_scenario(
@@ -97,7 +102,7 @@ class Evaluator:
 
         start_time = timer()
         
-        ground_truth: Set[MethodSignature] = stage.ground_truth
+        ground_truth_positive: Set[MethodSignature] = stage.ground_truth
 
         new_program: Program = Program.load(new_dir)
         old_program: Program = Program.load(old_dir)
@@ -122,12 +127,17 @@ class Evaluator:
             end_time = timer()
             test_time = end_time - start_time
 
-            ground_truth = self._extract_non_passing_tests(maven_project / "target/surefire-reports")
+            ground_truth_positive = self._extract_non_passing_tests(maven_project / "target/surefire-reports")
 
         stage.revert_changes(src_dir)
 
+        all_test_signatures: Set[MethodSignature] = {method.signature for (_, method) in new_program.all_test_methods()}
+        ground_truth_negative = all_test_signatures - ground_truth_positive
+
         return TestStageResult(
-            predicted, ground_truth,
+            predicted, 
+            ground_truth_positive,
+            ground_truth_negative,
             non_passing_tests,
             prediction_time,
             test_time
