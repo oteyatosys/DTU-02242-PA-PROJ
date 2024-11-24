@@ -7,12 +7,16 @@ from reader.method import Method
 from reader.method_signature import MethodSignature
 from static_analysis.interpreter.abstract_interpreter import PC, AbstractInterpreter
 from static_analysis.interpreter.abstractions.abstract_state import AbstractState
+from static_analysis.interpreter.arithmetic.interval_arithmetic import IntervalArithmetic
 from static_analysis.interpreter.arithmetic.sign_arithmetic import SignArithmetic
+from static_analysis.interpreter.it_abstract_interpreter import ItAbstractInterpreter
 from syntactic_analysis.bytecode.call_graph import CallGraph, build_call_graph
 import logging as l
 
+from syntactic_analysis.scanner import get_int_literals
+
 @dataclass
-class AbstractPredictor(TestPredictor):
+class ItAbstractPredictor(TestPredictor):
     def _remove_offsets(self, bytecode):
         if isinstance(bytecode, dict):
             return {k: self._remove_offsets(v) for k, v in bytecode.items() if k != 'offset'}
@@ -77,11 +81,14 @@ class AbstractPredictor(TestPredictor):
 
         test_predictions: Set[MethodSignature] = set()
 
-        arithmetic = SignArithmetic()
+        interesting_values = get_int_literals(new_program)
+
+        arithmetic = IntervalArithmetic()
         for test_signature in tests_to_analyse:
-            interpreter = AbstractInterpreter(
+            interpreter = ItAbstractInterpreter(
                 program = new_program,
                 arithmetic = arithmetic,
+                interesting_values=interesting_values
             )
 
             pc = PC(test_signature, 0)

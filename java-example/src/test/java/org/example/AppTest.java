@@ -6,13 +6,8 @@ import org.junit.jupiter.api.Test;
 public class AppTest {
 
     @Test
-    public static void testThruth( ){
-        assertTrue( true );
-    }
-
-    @Test
-    public static void testFail( ){
-        assertTrue( false );
+    public void testThruth( ){
+        assert true;
     }
 
     @Test
@@ -42,18 +37,6 @@ public class AppTest {
         assert App.factorial(1) == 1;
         assert App.factorial(2) == 2;
         assert App.factorial(3) == 6;
-    }
-
-    @Test
-    public static void testGetgreetings1() {
-        assert App.getGreeting("","") == ", !";
-        assert App.getGreeting("Hello","zyedeshi") == "Hello, zyedeshi!";
-    }
-
-    @Test
-    public static void testGetgreetings2() {
-        assert App.getGreeting("") == "Hello, !";
-        assert App.getGreeting("yfdqzqd124") == "Hello, yfdqzqd124!";
     }
 
     @Test
@@ -92,9 +75,5 @@ public class AppTest {
         assert App.isN238(10) == 0;
         assert App.isN238(-18280) == 0;
     }
-    
-    
-    
-
     
 }

@@ -18,3 +18,6 @@ class Bot:
 
     def __repr__(self) -> str:
         return "⊥"
+    
+    def widening(self, K, other):
+        return other

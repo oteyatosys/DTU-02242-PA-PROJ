@@ -104,3 +104,6 @@ class MethodSignature:
 
     def __str__(self):
         return f"{self.class_name}.{self.name}({', '.join(self.parameters)}) -> {self.return_type}"
+
+    def __repr__(self):
+        return str(self)

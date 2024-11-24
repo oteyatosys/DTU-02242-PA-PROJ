@@ -1,53 +1,20 @@
 from dataclasses import dataclass
 from typing import Any, Dict, Iterable, List, Set, Tuple
-from static_analysis.interpreter.abstractions import AbstractState, BoolSet, SignSet, Bot
+from static_analysis.interpreter.abstract_interpreter import PC, NextState, ReturnValue, Action
+from static_analysis.interpreter.abstractions import AbstractState, BoolSet, Bot
+from static_analysis.interpreter.abstractions.itval import Interval
 from static_analysis.interpreter.arithmetic.arithmetic import Arithmetic
 from reader import Program, MethodSignature
-from jpamb_utils import JvmType
 import logging as l
 
-@dataclass(frozen=True)
-class NextState:
-    next_state: AbstractState
-
-@dataclass(frozen=True)
-class ReturnValue:
-    value: Any
-    param_count: int
-
-Action = NextState | ReturnValue
-
-@dataclass(frozen=True)
-class PC:
-    signature: MethodSignature
-    offset: int
-
-    def __add__(self, i: int):
-        return PC(self.signature, self.offset + i)
-    
-    def __sub__(self, i: int):
-        return PC(self.signature, self.offset - i)
-    
-    def next(self) -> 'PC':
-        return self + 1
-    
-    def prev(self) -> 'PC':
-        return self - 1
-    
-    def jump(self, i: int) -> 'PC':
-        return PC(self.signature, i)
-    
-    def __lt__(self, other: 'PC') -> bool:
-        return self.signature < other.signature or self.offset < other.offset
-
-
-class AbstractInterpreter:
-    def __init__(self, program: Program, arithmetic: Arithmetic):
+class ItAbstractInterpreter:
+    def __init__(self, program: Program, arithmetic: Arithmetic, interesting_values: Set[int]):
         self.program = program
         self.arithmetic = arithmetic
         self.generated = 0
         self.final = set()
         self.errors = set()
+        self.interesting_values: Set[int] = interesting_values
 
     def analyse(self, pc: PC, initial_state: AbstractState) -> Dict[MethodSignature, Set[int]]:
         states: Dict[PC, AbstractState] = {pc: initial_state}
@@ -74,7 +41,7 @@ class AbstractInterpreter:
 
  
                 old = states.get(next_pc, Bot())
-                new_state = old | next_state
+                new_state = old.widening(self.interesting_values, next_state)
 
                 if old != new_state:
                     states[next_pc] = new_state
@@ -131,13 +98,19 @@ class AbstractInterpreter:
             self.errors.add("zero division")
             yield (-1, NextState(new_state))
 
-            right -= SignSet({'0'})
-
-            new_state = astate.copy()
-            new_state.stack[-1] = right
-
-            for res in self.step_binary(bc, pc, new_state):
-                yield res
+            right1 = right and Interval(float("-inf"),-1)
+            right2 = right and Interval(1,float("inf"))
+            if right1 != Interval.bot() :
+                new_state1 = astate.copy()
+                new_state1.stack[-1] = right1
+                for res in self.step_binary(bc, pc, new_state1):
+                    yield res 
+                    
+            if right2 != Interval.bot() :
+                new_state2 = astate.copy()          
+                new_state2.stack[-1] = right2
+                for res in self.step_binary(bc, pc, new_state2):
+                    yield res
 
     def step_load(self, bc: list, pc: PC, astate: AbstractState):
         new_state = astate.copy()
@@ -221,7 +194,7 @@ class AbstractInterpreter:
 
         if type == "integer":
             new_state.stack.append(
-                SignSet.abstract({value})
+                Interval.abstract({value})
             )
         elif type == "boolean":
             new_state.stack.append(
@@ -251,14 +224,13 @@ class AbstractInterpreter:
         else:
             yield (-1, ReturnValue(None, param_count))
             
-
-    # Stepping functions are now generators that can generate different 
-    # states depending on the abstract state.
     def step_ifz(self, bc: list, pc: PC, astate: AbstractState):
-        # depending on the defintion of the abstract_state 
         left = astate.stack.pop()
-        # Note that the abstract value might both compare and not compare to 0
-        for b in self.arithmetic.compare(bc["condition"], left, SignSet({'0'})):
+
+        if isinstance(left, BoolSet):
+            left = Interval.from_boolset(left)
+
+        for b in self.arithmetic.compare(bc["condition"], left, Interval(0, 0)):
             l.debug(f"Comparing {left} to 0 {bc['condition']}: {b}")
             if b:
                 yield (pc.jump(bc["target"]), NextState(astate.copy()))
@@ -291,15 +263,5 @@ class AbstractInterpreter:
         new_state.stack.append(BoolSet(False))
 
         yield (pc.next(), NextState(new_state))
-
-
-def generate_arguments(params: list[JvmType]):
-    for param in params:
-        if param == "int":
-            yield SignSet.top()
-        elif param == "boolean":
-            yield BoolSet.top()
-        else:
-            raise NotImplementedError(f"can't handle {param!r}")
 
 

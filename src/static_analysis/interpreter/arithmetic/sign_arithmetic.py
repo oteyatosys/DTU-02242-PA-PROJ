@@ -32,6 +32,21 @@ class SignArithmetic(Arithmetic[SignSet]):
             
         return SignSet(result_set)
 
+    def negate(self, a: SignSet) -> SignSet:
+        result_set: SignSet = SignSet()
+
+        for sign in a:
+            if sign == "0":
+                result_set |= SignSet("0")
+            elif sign == "-":
+                result_set |= SignSet("+")
+            elif sign == "+":
+                result_set |= SignSet("-")
+            else:
+                raise ValueError(f"Invalid sign {sign!r}")
+
+        return result_set
+
     def _add(self, a: Sign, b: Sign) -> Set[Sign]:    
         if a == "0":
             return { b }
@@ -121,6 +136,9 @@ class SignArithmetic(Arithmetic[SignSet]):
         if a == "0" and b == "0":
             return BoolSet( True )
         
+        if a != b:
+            return BoolSet( False )
+
         return BoolSet( True, False )
     
     def _ne (self, a: Sign, b: Sign) -> BoolSet:

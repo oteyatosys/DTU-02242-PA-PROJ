@@ -13,6 +13,7 @@ dependencies = [
     "tree-sitter>=0.23.2",
     "tree-sitter-java>=0.23.2",
     "jsondiff>=2.2.1",
+    "tqdm>=4.67.0",
 ]
 requires-python = "==3.13.*"
 readme = "README.md"
@@ -29,6 +30,7 @@ distribution = true
 prepare = {call = "scripts.prepare:main"}
 analyse = {call = "scripts.analyse:main"}
 interpret = {call = "scripts.interpret:main"}
+evaluate = {call = "scripts.evaluate:main"}
 
 [tool.pytest.ini_options]
 pythonpath = [
