@@ -40,10 +40,6 @@ class IntervalArithmetic(Arithmetic[Interval]):
 
         elif opr == "ne":
             result_set: BoolSet = BoolSet()
-            if (isinstance(a,BoolSet)) :
-                b_boolset = BoolSet((b.lb != 0),(b.ub == 1))
-                return a | b_boolset 
- 
             if (a.lb == b.lb == a.ub == b.ub):
                 return BoolSet(False)
             intersection = a and b
@@ -53,22 +49,40 @@ class IntervalArithmetic(Arithmetic[Interval]):
         
         elif opr == "gt":
             result_set: BoolSet = BoolSet()
-            if a.lb < b.lb :
+            if a.lb <= b.ub :
                 result_set |= BoolSet(False)
             else : result_set |= BoolSet(True)
-            if a.ub < b.ub :
+            if a.ub <= b.lb :
                 result_set |= BoolSet(False)
             else : result_set |= BoolSet(True)
             return result_set
         
+        elif opr == "ge":
+            result_set: BoolSet = BoolSet()
+            if a.lb < b.ub :
+                result_set |= BoolSet(False)
+            else : result_set |= BoolSet(True)
+
+            if a.ub < b.lb :
+                result_set |= BoolSet(False)
+            else : result_set |= BoolSet(True)
+
+            return result_set
+        
         elif opr == "le":
             result_set: BoolSet = BoolSet()
-            if a.lb <= b.ub :
-                result_set |= BoolSet(True)
-            else : result_set |= BoolSet(False)
+            if a.lb > b.ub :
+                result_set |= BoolSet(False)
+            else : result_set |= BoolSet(True)
+
             if a.ub > b.lb :
                 result_set |= BoolSet(False)
             else : result_set |= BoolSet(True)
+
             return result_set
+
         else:
             raise NotImplementedError(f"can't handle {opr!r}")
+        
+    def negate(self, a: Interval) -> Interval:
+        return Interval(-a.ub, -a.lb)
