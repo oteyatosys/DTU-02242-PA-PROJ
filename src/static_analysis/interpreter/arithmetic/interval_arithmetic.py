@@ -31,21 +31,28 @@ class IntervalArithmetic(Arithmetic[Interval]):
     @staticmethod
     def compare(opr: str, a: Interval, b: Interval) -> BoolSet:
         if opr == "eq":
+            result_set: BoolSet = BoolSet()
+            intersection = a & b
             if (a.lb == b.lb == a.ub == b.ub):
-                return BoolSet(True)
-            intersection = a and b
-            if (intersection.lb == float("inf") and intersection.ub == float("-inf")):
-                return BoolSet(False)
-            return BoolSet(True, False)
+                result_set |= BoolSet(True)
+            elif (intersection.lb == float("inf") and intersection.ub == float("-inf")):
+                result_set |= BoolSet(False)
+            else:
+                result_set |= BoolSet(True, False)
+
+            return result_set
 
         elif opr == "ne":
             result_set: BoolSet = BoolSet()
+            intersection = a & b
             if (a.lb == b.lb == a.ub == b.ub):
-                return BoolSet(False)
-            intersection = a and b
-            if (intersection.lb == float("inf") and intersection.ub == float("-inf")):
-                return BoolSet(True)
-            return BoolSet(True, False)
+                result_set |= BoolSet(False)
+            elif (intersection.lb == float("inf") and intersection.ub == float("-inf")):
+                result_set |= BoolSet(True)
+            else:
+                result_set |= BoolSet(True, False)
+
+            return result_set
         
         elif opr == "gt":
             result_set: BoolSet = BoolSet()
