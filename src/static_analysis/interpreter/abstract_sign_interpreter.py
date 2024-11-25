@@ -310,14 +310,3 @@ class AbstractSignInterpreter:
             return self.bool_arithmetic
         else:
             raise NotImplementedError(f"can't handle {value!r}")
-
-def generate_arguments(params: list[JvmType]):
-    for param in params:
-        if param == "int":
-            yield SignSet.top()
-        elif param == "boolean":
-            yield BoolSet.top()
-        else:
-            raise NotImplementedError(f"can't handle {param!r}")
-
-
