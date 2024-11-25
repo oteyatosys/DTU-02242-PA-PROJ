@@ -1,5 +1,5 @@
 from typing import Dict, Iterable, List, Set, Tuple
-from static_analysis.interpreter.abstract_sign_interpreter import PC, NextState, ReturnValue, Action
+from static_analysis.interpreter.common import PC, NextState, ReturnValue, Action
 from static_analysis.interpreter.abstractions import AbstractState, BoolSet, Bot
 from static_analysis.interpreter.abstractions.interval import Interval
 from static_analysis.interpreter.arithmetic.bool_arithmetic import BoolArithmetic

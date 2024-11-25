@@ -1,46 +1,10 @@
-from dataclasses import dataclass
-from typing import Any, Dict, Iterable, List, Set, Tuple
+from typing import Dict, Iterable, List, Set, Tuple
 from static_analysis.interpreter.abstractions import AbstractState, BoolSet, SignSet, Bot
 from static_analysis.interpreter.arithmetic.bool_arithmetic import BoolArithmetic
 from static_analysis.interpreter.arithmetic.sign_arithmetic import SignArithmetic
+from static_analysis.interpreter.common import Action, NextState, PC, ReturnValue
 from reader import Program, MethodSignature
-from jpamb_utils import JvmType
 import logging as l
-
-@dataclass(frozen=True)
-class NextState:
-    next_state: AbstractState
-
-@dataclass(frozen=True)
-class ReturnValue:
-    value: Any
-    param_count: int
-
-Action = NextState | ReturnValue
-
-@dataclass(frozen=True)
-class PC:
-    signature: MethodSignature
-    offset: int
-
-    def __add__(self, i: int):
-        return PC(self.signature, self.offset + i)
-    
-    def __sub__(self, i: int):
-        return PC(self.signature, self.offset - i)
-    
-    def next(self) -> 'PC':
-        return self + 1
-    
-    def prev(self) -> 'PC':
-        return self - 1
-    
-    def jump(self, i: int) -> 'PC':
-        return PC(self.signature, i)
-    
-    def __lt__(self, other: 'PC') -> bool:
-        return self.signature < other.signature or self.offset < other.offset
-
 
 class AbstractSignInterpreter:
     def __init__(self, program: Program):
