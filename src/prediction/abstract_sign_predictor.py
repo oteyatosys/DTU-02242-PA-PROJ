@@ -77,9 +77,7 @@ class AbstractSignPredictor(TestPredictor):
         test_predictions: Set[MethodSignature] = set()
 
         for test_signature in tests_to_analyse:
-            interpreter = AbstractSignInterpreter(
-                program = new_program
-            )
+            interpreter = AbstractSignInterpreter(new_program)
 
             pc = PC(test_signature, 0)
             initial_state = AbstractState([], {})

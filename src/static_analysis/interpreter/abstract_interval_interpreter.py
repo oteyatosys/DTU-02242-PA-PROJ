@@ -1,22 +1,22 @@
-from dataclasses import dataclass
-from typing import Any, Dict, Iterable, List, Set, Tuple
+from typing import Dict, Iterable, List, Set, Tuple
 from static_analysis.interpreter.abstract_sign_interpreter import PC, NextState, ReturnValue, Action
 from static_analysis.interpreter.abstractions import AbstractState, BoolSet, Bot
 from static_analysis.interpreter.abstractions.interval import Interval
 from static_analysis.interpreter.arithmetic.bool_arithmetic import BoolArithmetic
 from static_analysis.interpreter.arithmetic.interval_arithmetic import IntervalArithmetic
 from reader import Program, MethodSignature
+from syntactic_analysis.scanner import get_int_literals
 import logging as l
 
 class AbstractIntervalInterpreter:
-    def __init__(self, program: Program, interesting_values: Set[int]):
+    def __init__(self, program: Program):
         self.program = program
         self.int_arithmetic = IntervalArithmetic()
         self.bool_arithmetic = BoolArithmetic()
         self.generated = 0
         self.final = set()
         self.errors = set()
-        self.interesting_values: Set[int] = interesting_values
+        self.interesting_values: Set[int] = get_int_literals(program)
 
     def analyse(self, pc: PC, initial_state: AbstractState) -> Dict[MethodSignature, Set[int]]:
         states: Dict[PC, AbstractState] = {pc: initial_state}

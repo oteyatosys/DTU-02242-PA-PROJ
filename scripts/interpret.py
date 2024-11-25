@@ -20,11 +20,8 @@ l.basicConfig(level=l.DEBUG)
 def main():
     program = Program.load(project_root / "data" / "new")
     signature = MethodSignature.from_str("org.example.FunsTest.testZero:()V")
-    interesting_values = get_int_literals(program)
 
-    interpreter = AbstractSignInterpreter(
-        program=program
-    )
+    interpreter = AbstractSignInterpreter(program)
 
     pc = PC(signature, 0)
     initial_state = AbstractState([], {})
