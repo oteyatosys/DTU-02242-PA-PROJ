@@ -2,14 +2,10 @@
 from pathlib import Path
 from evaluation.evaluator import Evaluator
 from evaluation.results import TestSuiteResult
-from evaluation.test_scenario import ReplaceLines, TestScenario, TestStage, TestSuite
 from prediction.abstract_predictor import AbstractPredictor
-from prediction.call_graph_predictor import CallGraphPredictor
 from prediction.predictor import TestPredictor
 from evaluation.test_scenario_builder import TestSuiteBuilder
 import pickle
-
-from reader.method_signature import MethodSignature
 
 project_root = Path(__file__).parent.parent
 
