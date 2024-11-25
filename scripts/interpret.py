@@ -7,38 +7,36 @@ import sys
 project_root = Path(__file__).parent.parent
 sys.path.append(str(project_root / "src"))
 
-from reader.program import Program
+from reader import Program, MethodSignature
 from static_analysis.interpreter.abstract_interpreter import PC, AbstractInterpreter
+from static_analysis.interpreter.it_abstract_interpreter import ItAbstractInterpreter
 from static_analysis.interpreter.abstractions.abstract_state import AbstractState
 from static_analysis.interpreter.arithmetic.sign_arithmetic import SignArithmetic
+from static_analysis.interpreter.arithmetic.interval_arithmetic import IntervalArithmetic
+from syntactic_analysis.scanner import get_int_literals
+
 import logging as l
 
-# l.basicConfig(level=l.DEBUG)
+l.basicConfig(level=l.DEBUG)
 
 def main():
     program = Program.load(project_root / "data" / "new")
+    signature = MethodSignature.from_str("org.example.FunsTest.testRun2:()V")
+    interesting_values = get_int_literals(program)
     
-    for _, method in program.all_test_methods():
-        print("-------------------------")
-        print(f"Running test: {method.signature}")
+    interpreter = ItAbstractInterpreter(
+        program=program,
+        arithmetic= IntervalArithmetic(),
+        interesting_values=interesting_values
+    )
 
-        # if method.name != "testGetInt":
-        #     print("Skipping")
-        #     continue
+    pc = PC(signature, 0)
+    initial_state = AbstractState([], {})
 
-        interpreter = AbstractInterpreter(
-            program=program,
-            arithmetic= SignArithmetic()
-        )
+    touched = interpreter.analyse(pc, initial_state)
 
-        pc = PC(method.signature, 0)
-        initial_state = AbstractState([], {})
-
-        touched = interpreter.analyse(pc, initial_state)
-
-        print(f"End states: {interpreter.final}")
-        print(f"Touched: {touched}")
-
+    print(f"End states: {interpreter.final}")
+    print(f"Touched: {touched}")
 
 if __name__ == "__main__":
     main()
