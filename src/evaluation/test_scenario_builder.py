@@ -1,5 +1,5 @@
 from pathlib import Path
-from evaluation.test_scenario import TestSuite, TestScenario, TestStage, Deletion, Addition, ReplaceLines
+from evaluation.test_scenario import TestSuite, TestScenario, TestStage, Deletion, Addition
 from reader.method_signature import MethodSignature
 from contextlib import contextmanager
 
