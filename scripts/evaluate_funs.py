@@ -17,7 +17,7 @@ project_root = Path(__file__).parent.parent
 def main():
     evaluator = Evaluator()
 
-    predictor: TestPredictor = CallGraphPredictor()
+    predictor: TestPredictor = AbstractPredictor()
 
     builder = TestSuiteBuilder(project_root / "java-example")
     

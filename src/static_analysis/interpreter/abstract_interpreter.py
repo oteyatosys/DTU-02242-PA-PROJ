@@ -3,6 +3,7 @@ from typing import Any, Dict, Iterable, List, Set, Tuple
 from static_analysis.interpreter.abstractions import AbstractState, BoolSet, SignSet, Bot
 from static_analysis.interpreter.arithmetic.arithmetic import Arithmetic
 from static_analysis.interpreter.arithmetic.bool_arithmetic import BoolArithmetic
+from static_analysis.interpreter.arithmetic.sign_arithmetic import SignArithmetic
 from reader import Program, MethodSignature
 from jpamb_utils import JvmType
 import logging as l
@@ -43,9 +44,10 @@ class PC:
 
 
 class AbstractInterpreter:
-    def __init__(self, program: Program, arithmetic: Arithmetic):
+    def __init__(self, program: Program):
         self.program = program
-        self.arithmetic = arithmetic
+        self.bool_arithmetic = BoolArithmetic()
+        self.int_arithmetic = SignArithmetic()
         self.generated = 0
         self.final = set()
         self.errors = set()
@@ -122,8 +124,10 @@ class AbstractInterpreter:
         right = new_state.stack.pop()
         left = new_state.stack.pop()
 
+        arithmetic = self.get_arithmetic(left)
+
         try:
-            result = self.arithmetic.binary(bc["operant"], left, right)
+            result = arithmetic.binary(bc["operant"], left, right)
             new_state.stack.append(result)
 
             yield (pc.next(), NextState(new_state))
@@ -199,8 +203,9 @@ class AbstractInterpreter:
         new_state = astate.copy()
 
         left = new_state.stack.pop()
+        arithmetic = self.get_arithmetic(left)
 
-        new_state.stack.append(self.arithmetic.negate(left))
+        new_state.stack.append(arithmetic.negate(left))
 
         yield (pc.next(), NextState(new_state))
 
@@ -222,11 +227,11 @@ class AbstractInterpreter:
 
         if type == "integer":
             new_state.stack.append(
-                SignSet.abstract({value})
+                self.int_arithmetic.abstract({value})
             )
         elif type == "boolean":
             new_state.stack.append(
-                BoolSet.abstract({value})
+                self.bool_arithmetic.abstract({value})
             )
         else:
             new_state.stack.append(value)
@@ -258,16 +263,11 @@ class AbstractInterpreter:
     def step_ifz(self, bc: list, pc: PC, astate: AbstractState):
         # depending on the defintion of the abstract_state 
         left = astate.stack.pop()
-
-        right = SignSet({'0'})
-
-        arith = self.arithmetic
-        if isinstance(left, BoolSet):
-            arith = BoolArithmetic()
-            right = BoolSet(False)
-
+        arithmetic = self.get_arithmetic(left)
+        right = arithmetic.from_int(0)
+        
         # Note that the abstract value might both compare and not compare to 0
-        for b in arith.compare(bc["condition"], left, right):
+        for b in arithmetic.compare(bc["condition"], left, right):
             l.debug(f"Comparing {left} to {right} {bc['condition']}: {b}")
             if b:
                 yield (pc.jump(bc["target"]), NextState(astate.copy()))
@@ -278,11 +278,9 @@ class AbstractInterpreter:
         right = astate.stack.pop()
         left = astate.stack.pop()
 
-        arith = self.arithmetic
-        if isinstance(left, BoolSet):
-            arith = BoolArithmetic()
+        arithmetic = self.get_arithmetic(left)
 
-        for b in arith.compare(bc["condition"], left, right):
+        for b in arithmetic.compare(bc["condition"], left, right):
             l.debug(f"Comparing {left} to {right} {bc['condition']}: {b}")
             if b:
                 yield (pc.jump(bc["target"]), NextState(astate.copy()))
@@ -306,6 +304,13 @@ class AbstractInterpreter:
 
         yield (pc.next(), NextState(new_state))
 
+    def get_arithmetic(self, value):
+        if isinstance(value, SignSet):
+            return self.int_arithmetic
+        elif isinstance(value, BoolSet):
+            return self.bool_arithmetic
+        else:
+            raise NotImplementedError(f"can't handle {value!r}")
 
 def generate_arguments(params: list[JvmType]):
     for param in params:

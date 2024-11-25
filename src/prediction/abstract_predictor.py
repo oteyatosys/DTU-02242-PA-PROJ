@@ -77,11 +77,9 @@ class AbstractPredictor(TestPredictor):
 
         test_predictions: Set[MethodSignature] = set()
 
-        arithmetic = SignArithmetic()
         for test_signature in tests_to_analyse:
             interpreter = AbstractInterpreter(
-                program = new_program,
-                arithmetic = arithmetic,
+                program = new_program
             )
 
             pc = PC(test_signature, 0)

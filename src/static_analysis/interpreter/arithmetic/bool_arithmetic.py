@@ -6,6 +6,12 @@ from static_analysis.interpreter.arithmetic.arithmetic import Arithmetic
 @dataclass
 class BoolArithmetic(Arithmetic[BoolSet]):
 
+    def abstract(self, value) -> BoolSet:
+        return BoolSet.abstract(value)
+    
+    def from_int(self, i: int) -> BoolSet:
+        return BoolSet(i != 0)
+    
     def compare(self, opr: str, a: BoolSet, b: BoolSet) -> BoolSet:
         combinations = itertools.product(a, b)
 

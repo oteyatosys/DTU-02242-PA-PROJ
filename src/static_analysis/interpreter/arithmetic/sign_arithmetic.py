@@ -9,6 +9,12 @@ from static_analysis.interpreter.arithmetic.arithmetic import Arithmetic
 class SignArithmetic(Arithmetic[SignSet]):
     _order: Tuple[Sign] = ("-", "0", "+")
 
+    def abstract(self, value) -> SignSet:
+        return SignSet.abstract(value)
+
+    def from_int(self, i: int) -> SignSet:
+        return self.abstract({i})
+
     def binary(self, opr: str, left: SignSet, right: SignSet) -> SignSet:
         combinations = itertools.product(left, right)
 

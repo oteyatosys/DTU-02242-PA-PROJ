@@ -21,13 +21,11 @@ l.basicConfig(level=l.DEBUG)
 
 def main():
     program = Program.load(project_root / "data" / "new")
-    signature = MethodSignature.from_str("org.example.FunsTest.testRun2:()V")
+    signature = MethodSignature.from_str("org.example.FunsTest.testZero:()V")
     interesting_values = get_int_literals(program)
     
-    interpreter = ItAbstractInterpreter(
-        program=program,
-        arithmetic= IntervalArithmetic(),
-        interesting_values=interesting_values
+    interpreter = AbstractInterpreter(
+        program=program
     )
 
     pc = PC(signature, 0)
