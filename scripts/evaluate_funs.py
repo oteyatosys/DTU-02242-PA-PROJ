@@ -21,10 +21,16 @@ def main():
     builder = TestSuiteBuilder(project_root / "java-example")
     
     with builder.new_scenario() as scenario:
-        with scenario.new_stage({ MethodSignature.from_str("org.example.AppTest.testFactorial:()V") }) as sb:
+        with scenario.new_stage({ MethodSignature.from_str("org.example.FunsTest.testRun3:()V") }) as sb:
             sb.goto(Path("org/example/Funs.java"), "public static int one()")
             sb.move(2)
-            sb.replace("return 666;")
+            sb.replace("return -1;")
+
+    with builder.new_scenario() as scb:
+        with scb.new_stage({ MethodSignature.from_str("org.example.FunsTest.testRun1:()V") }) as sb:
+            sb.goto(Path("org/example/Funs.java"), "public static int run(int i)")
+            sb.move(1)
+            sb.delete()
 
     test_suite = builder.build()
     
@@ -45,4 +51,3 @@ if __name__ == "__main__":
     # result: TestSuiteResult = load_result()
 
     # result.print_stats()
-    

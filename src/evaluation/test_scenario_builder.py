@@ -6,7 +6,6 @@ class TestSuiteBuilder:
     
     def __init__(self, java_project_path):
         self.java_project_path = java_project_path
-        self.base_path = java_project_path / Path("src/main/java")
         self.scenarios = []
 
     @contextmanager
@@ -52,12 +51,14 @@ class TestStageBuilder:
         self.stage.add_change(Deletion(self.file_path, pos))
 
     def add(self, new_content):
+        # Ensure that new_content ends with a newline
+        if not new_content.endswith("\n"):
+            new_content += "\n"
         self.stage.add_change(Addition(self.file_path, self.line, new_content))
 
     def replace(self, new_content, lines = 1):
-        pos = (self.line, self.line + lines - 1)
-        self.stage.add_change(Deletion(self.file_path, pos))
-        self.stage.add_change(Addition(self.file_path, self.line, new_content))
+        self.delete(lines)
+        self.add(new_content)
 
     # Search for a line in a file and return the line number
     def find_line(self, file_path, search):
