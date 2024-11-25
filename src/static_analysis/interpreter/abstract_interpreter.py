@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Any, Dict, Iterable, List, Set, Tuple
 from static_analysis.interpreter.abstractions import AbstractState, BoolSet, SignSet, Bot
 from static_analysis.interpreter.arithmetic.arithmetic import Arithmetic
+from static_analysis.interpreter.arithmetic.bool_arithmetic import BoolArithmetic
 from reader import Program, MethodSignature
 from jpamb_utils import JvmType
 import logging as l
@@ -257,9 +258,17 @@ class AbstractInterpreter:
     def step_ifz(self, bc: list, pc: PC, astate: AbstractState):
         # depending on the defintion of the abstract_state 
         left = astate.stack.pop()
+
+        right = SignSet({'0'})
+
+        arith = self.arithmetic
+        if isinstance(left, BoolSet):
+            arith = BoolArithmetic()
+            right = BoolSet(False)
+
         # Note that the abstract value might both compare and not compare to 0
-        for b in self.arithmetic.compare(bc["condition"], left, SignSet({'0'})):
-            l.debug(f"Comparing {left} to 0 {bc['condition']}: {b}")
+        for b in arith.compare(bc["condition"], left, right):
+            l.debug(f"Comparing {left} to {right} {bc['condition']}: {b}")
             if b:
                 yield (pc.jump(bc["target"]), NextState(astate.copy()))
             else:
@@ -269,7 +278,12 @@ class AbstractInterpreter:
         right = astate.stack.pop()
         left = astate.stack.pop()
 
-        for b in self.arithmetic.compare(bc["condition"], left, right):
+        arith = self.arithmetic
+        if isinstance(left, BoolSet):
+            arith = BoolArithmetic()
+
+        for b in arith.compare(bc["condition"], left, right):
+            l.debug(f"Comparing {left} to {right} {bc['condition']}: {b}")
             if b:
                 yield (pc.jump(bc["target"]), NextState(astate.copy()))
             else:

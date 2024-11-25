@@ -115,52 +115,37 @@ class SignArithmetic(Arithmetic[SignSet]):
 
 
     def _le (self, a: Sign, b: Sign) -> BoolSet:
-        if a != b:
-            return BoolSet( self._order.index(a) <= self._order.index(b) )
-        
-        if a == "0":
-            return BoolSet( True )
-        
-        return BoolSet( True, False )
+        return Arithmetic.lt(a, b) | Arithmetic.eq(a, b)
     
     def _lt (self, a: Sign, b: Sign) -> BoolSet:
-        if a != b:
-            return BoolSet(self._order.index(a) < self._order.index(b))
-        
-        if a == "0":
-            return BoolSet( False )
-        
-        return BoolSet( True, False )
+        match (a, b):
+            case ("+", "+"): return BoolSet( True, False )
+            case ("+", _): return BoolSet( False )
+            case ("0", "+"): return BoolSet( True )
+            case ("0", _): return BoolSet( False )
+            case ("-", "-"): return BoolSet( True, False )
+            case ("-", _): return BoolSet( True )
     
     def _eq (self, a: Sign, b: Sign) -> BoolSet:
-        if a == "0" and b == "0":
-            return BoolSet( True )
-        
-        if a != b:
-            return BoolSet( False )
-
-        return BoolSet( True, False )
+        match (a, b):
+            case ("+", "+") | ("-", "-"): return BoolSet( True, False )
+            case ("0", "0"): return BoolSet( True )
+            case (_, _): return BoolSet( False )
     
     def _ne (self, a: Sign, b: Sign) -> BoolSet:
-        if a == "0" and b == "0":
-            return BoolSet( False )
-        
-        return BoolSet( True, False )
+        match (a, b):
+            case ("+", "+") | ("-", "-"): return BoolSet( True, False )
+            case ("0", "0"): return BoolSet( False )
+            case (_, _): return BoolSet( True )
     
     def _ge (self, a: Sign, b: Sign) -> BoolSet:
-        if a != b:
-            return BoolSet( self._order.index(a) >= self._order.index(b) )
-        
-        if a == "0":
-            return BoolSet( True )
-        
-        return BoolSet( True, False )
+        return Arithmetic.gt(a, b) | Arithmetic.eq(a, b)
     
     def _gt (self, a: Sign, b: Sign) -> BoolSet:
-        if a != b:
-            return BoolSet( self._order.index(a) > self._order.index(b) )
-        
-        if a == "0":
-            return BoolSet( False )
-        
-        return BoolSet( True, False )
+        match (a, b):
+            case ("+", "+"): return BoolSet( True, False )
+            case ("+", _): return BoolSet( True )
+            case ("0", "+" | "0"): return BoolSet( False )
+            case ("0", "-"): return BoolSet( True )
+            case ("-", "-"): return BoolSet( True, False )
+            case ("-", _): return BoolSet( False )
