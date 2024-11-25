@@ -3,7 +3,7 @@ from pathlib import Path
 from evaluation.evaluator import Evaluator
 from evaluation.results import TestSuiteResult
 from evaluation.test_scenario import ReplaceLines, TestScenario, TestStage, TestSuite
-from prediction.abstract_predictor import AbstractPredictor
+from prediction.abstract_sign_predictor import AbstractSignPredictor
 from prediction.call_graph_predictor import CallGraphPredictor
 from prediction.predictor import TestPredictor
 import pickle
@@ -15,7 +15,7 @@ project_root = Path(__file__).parent.parent
 def main():
     evaluator = Evaluator()
 
-    predictor: TestPredictor = AbstractPredictor()
+    predictor: TestPredictor = AbstractSignPredictor()
 
     test_changeInt = TestScenario(
         project_root / "java-example", [

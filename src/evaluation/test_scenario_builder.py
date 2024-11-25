@@ -61,7 +61,7 @@ class TestStageBuilder:
         self.delete(lines)
         self.add(new_content)
 
-    def expect_change(self, signature_str):
+    def expect_fail(self, signature_str):
         signature = MethodSignature.from_str(signature_str)
         if self.stage.ground_truth is None:
             self.stage.ground_truth = {signature}

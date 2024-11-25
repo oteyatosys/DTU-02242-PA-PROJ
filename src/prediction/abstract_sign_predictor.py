@@ -5,18 +5,13 @@ import jsondiff
 from prediction.predictor import TestPredictor
 from reader.method import Method
 from reader.method_signature import MethodSignature
-from static_analysis.interpreter.abstract_interpreter import PC, AbstractInterpreter
+from static_analysis.interpreter.abstract_sign_interpreter import PC, AbstractSignInterpreter
 from static_analysis.interpreter.abstractions.abstract_state import AbstractState
-from static_analysis.interpreter.arithmetic.interval_arithmetic import IntervalArithmetic
-from static_analysis.interpreter.arithmetic.sign_arithmetic import SignArithmetic
-from static_analysis.interpreter.it_abstract_interpreter import ItAbstractInterpreter
 from syntactic_analysis.bytecode.call_graph import CallGraph, build_call_graph
 import logging as l
 
-from syntactic_analysis.scanner import get_int_literals
-
 @dataclass
-class ItAbstractPredictor(TestPredictor):
+class AbstractSignPredictor(TestPredictor):
     def _remove_offsets(self, bytecode):
         if isinstance(bytecode, dict):
             return {k: self._remove_offsets(v) for k, v in bytecode.items() if k != 'offset'}
@@ -81,14 +76,9 @@ class ItAbstractPredictor(TestPredictor):
 
         test_predictions: Set[MethodSignature] = set()
 
-        interesting_values = get_int_literals(new_program)
-
-        arithmetic = IntervalArithmetic()
         for test_signature in tests_to_analyse:
-            interpreter = ItAbstractInterpreter(
-                program = new_program,
-                arithmetic = arithmetic,
-                interesting_values=interesting_values
+            interpreter = AbstractSignInterpreter(
+                program = new_program
             )
 
             pc = PC(test_signature, 0)
