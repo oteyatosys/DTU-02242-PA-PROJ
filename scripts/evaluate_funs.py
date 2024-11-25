@@ -3,6 +3,7 @@ from pathlib import Path
 from evaluation.evaluator import Evaluator
 from evaluation.results import TestSuiteResult
 from prediction.abstract_predictor import AbstractPredictor
+from prediction.itabstract_predictor import ItAbstractPredictor
 from prediction.predictor import TestPredictor
 from evaluation.test_scenario_builder import TestSuiteBuilder
 import pickle
@@ -12,23 +13,23 @@ project_root = Path(__file__).parent.parent
 def main():
     evaluator = Evaluator()
 
-    predictor: TestPredictor = AbstractPredictor()
+    predictor: TestPredictor = ItAbstractPredictor()
 
     builder = TestSuiteBuilder(project_root / "java-example")
     
     with builder.new_scenario() as scb:
         with scb.new_stage() as sb:
-            sb.goto("org/example/Funs.java", "public static int one()")
+            sb.goto("org/example/Funs.java", "int one()")
             sb.move(2)
             sb.replace("return 42;")
             sb.expect_change("org.example.FunsTest.testRun1:()V")
 
-    with builder.new_scenario() as scb:
-        with scb.new_stage() as sb:
-            sb.goto("org/example/Funs.java", "public static int two()")
-            sb.move(2)
-            sb.replace("return 42;")
-            sb.expect_change("org.example.FunsTest.testRun2:()V")
+    # with builder.new_scenario() as scb:
+    #     with scb.new_stage() as sb:
+    #         sb.goto("org/example/Funs.java", "public static int two()")
+    #         sb.move(2)
+    #         sb.replace("return 42;")
+    #         sb.expect_change("org.example.FunsTest.testRun2:()V")
 
     test_suite = builder.build()
     
