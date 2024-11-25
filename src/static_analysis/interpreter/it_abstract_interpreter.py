@@ -242,6 +242,7 @@ class ItAbstractInterpreter:
         left = astate.stack.pop()
 
         for b in self.arithmetic.compare(bc["condition"], left, right):
+            l.debug(f"Comparing {left} to {right} {bc['condition']}: {b}")
             if b:
                 yield (pc.jump(bc["target"]), NextState(astate.copy()))
             else:
