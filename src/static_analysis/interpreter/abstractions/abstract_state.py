@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Union
 
 from static_analysis.interpreter.abstractions.bool_set import BoolSet
-from static_analysis.interpreter.abstractions.itval import Interval
+from static_analysis.interpreter.abstractions.interval import Interval
 from static_analysis.interpreter.abstractions.sign_set import SignSet
 
 AbstractValue = Union[SignSet, BoolSet, Interval]

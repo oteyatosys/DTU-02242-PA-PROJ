@@ -86,7 +86,6 @@ class AbstractIntervalPredictor(TestPredictor):
         for test_signature in tests_to_analyse:
             interpreter = AbstractIntervalInterpreter(
                 program = new_program,
-                arithmetic = arithmetic,
                 interesting_values=interesting_values
             )
 

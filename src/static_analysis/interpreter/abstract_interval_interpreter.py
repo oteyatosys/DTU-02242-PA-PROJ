@@ -2,15 +2,17 @@ from dataclasses import dataclass
 from typing import Any, Dict, Iterable, List, Set, Tuple
 from static_analysis.interpreter.abstract_sign_interpreter import PC, NextState, ReturnValue, Action
 from static_analysis.interpreter.abstractions import AbstractState, BoolSet, Bot
-from static_analysis.interpreter.abstractions.itval import Interval
-from static_analysis.interpreter.arithmetic.arithmetic import Arithmetic
+from static_analysis.interpreter.abstractions.interval import Interval
+from static_analysis.interpreter.arithmetic.bool_arithmetic import BoolArithmetic
+from static_analysis.interpreter.arithmetic.interval_arithmetic import IntervalArithmetic
 from reader import Program, MethodSignature
 import logging as l
 
 class AbstractIntervalInterpreter:
-    def __init__(self, program: Program, arithmetic: Arithmetic, interesting_values: Set[int]):
+    def __init__(self, program: Program, interesting_values: Set[int]):
         self.program = program
-        self.arithmetic = arithmetic
+        self.int_arithmetic = IntervalArithmetic()
+        self.bool_arithmetic = BoolArithmetic()
         self.generated = 0
         self.final = set()
         self.errors = set()
@@ -88,8 +90,10 @@ class AbstractIntervalInterpreter:
         right = new_state.stack.pop()
         left = new_state.stack.pop()
 
+        arithmetic = self.get_arithmetic(left)
+
         try:
-            result = self.arithmetic.binary(bc["operant"], left, right)
+            result = arithmetic.binary(bc["operant"], left, right)
             new_state.stack.append(result)
 
             yield (pc.next(), NextState(new_state))
@@ -172,7 +176,8 @@ class AbstractIntervalInterpreter:
 
         left = new_state.stack.pop()
 
-        new_state.stack.append(self.arithmetic.negate(left))
+        arithmetic = self.get_arithmetic(left)
+        new_state.stack.append(arithmetic.negate(left))
 
         yield (pc.next(), NextState(new_state))
 
@@ -226,11 +231,10 @@ class AbstractIntervalInterpreter:
             
     def step_ifz(self, bc: list, pc: PC, astate: AbstractState):
         left = astate.stack.pop()
+        arithmetic = self.get_arithmetic(left)
+        right = arithmetic.from_int(0)
 
-        if isinstance(left, BoolSet):
-            left = Interval.from_boolset(left)
-
-        for b in self.arithmetic.compare(bc["condition"], left, Interval(0, 0)):
+        for b in arithmetic.compare(bc["condition"], left, right):
             l.debug(f"Comparing {left} to 0 {bc['condition']}: {b}")
             if b:
                 yield (pc.jump(bc["target"]), NextState(astate.copy()))
@@ -241,7 +245,9 @@ class AbstractIntervalInterpreter:
         right = astate.stack.pop()
         left = astate.stack.pop()
 
-        for b in self.arithmetic.compare(bc["condition"], left, right):
+        arithmetic = self.get_arithmetic(left)
+
+        for b in arithmetic.compare(bc["condition"], left, right):
             l.debug(f"Comparing {left} to {right} {bc['condition']}: {b}")
             if b:
                 yield (pc.jump(bc["target"]), NextState(astate.copy()))
@@ -265,4 +271,11 @@ class AbstractIntervalInterpreter:
 
         yield (pc.next(), NextState(new_state))
 
+    def get_arithmetic(self, value):
+        if isinstance(value, Interval):
+            return self.int_arithmetic
+        elif isinstance(value, BoolSet):
+            return self.bool_arithmetic
+        else:
+            raise NotImplementedError(f"can't handle {value!r}")
 

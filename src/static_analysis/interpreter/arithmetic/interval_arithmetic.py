@@ -1,10 +1,19 @@
 from dataclasses import dataclass
 from static_analysis.interpreter.abstractions.bool_set import BoolSet
-from static_analysis.interpreter.abstractions.itval import Interval
+from static_analysis.interpreter.abstractions.interval import Interval
 from static_analysis.interpreter.arithmetic.arithmetic import Arithmetic
 
 @dataclass
 class IntervalArithmetic(Arithmetic[Interval]):
+    
+    @staticmethod
+    def abstarct(value) -> Interval:
+        return Interval.abstract(value)
+
+    @staticmethod
+    def from_int(a: int) -> Interval:
+        return Interval(a, a)
+
     @staticmethod
     def binary(opr: str, a: Interval, b: Interval) -> Interval:
 
