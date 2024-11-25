@@ -1,5 +1,6 @@
 from pathlib import Path
 from evaluation.test_scenario import TestSuite, TestScenario, TestStage, Deletion, Addition, ReplaceLines
+from reader.method_signature import MethodSignature
 from contextlib import contextmanager
 
 class TestSuiteBuilder:
@@ -24,8 +25,8 @@ class TestScenarioBuilder:
         self.scenario = scenario
 
     @contextmanager
-    def new_stage(self, ground_truth):
-        stage = TestStage([], ground_truth)
+    def new_stage(self):
+        stage = TestStage([], None)
         yield TestStageBuilder(self, stage)
         self.scenario.stages.append(stage)
 
@@ -60,9 +61,16 @@ class TestStageBuilder:
         self.delete(lines)
         self.add(new_content)
 
+    def expect_change(self, signature_str):
+        signature = MethodSignature.from_str(signature_str)
+        if self.stage.ground_truth is None:
+            self.stage.ground_truth = {signature}
+        else:
+            self.stage.ground_truth.add(signature)
+
     # Search for a line in a file and return the line number
     def find_line(self, file_path, search):
-        path = self.stage_builder.suite_builder.java_project_path / Path("src/main/java") / file_path
+        path = self.stage_builder.suite_builder.java_project_path / Path("src/main/java") / Path(file_path)
         with open(path, 'r') as f:
             lines = f.readlines()
             for i, line in enumerate(lines):
