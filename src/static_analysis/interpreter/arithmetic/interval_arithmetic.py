@@ -7,7 +7,7 @@ from static_analysis.interpreter.arithmetic.arithmetic import Arithmetic
 class IntervalArithmetic(Arithmetic[Interval]):
     
     @staticmethod
-    def abstarct(value) -> Interval:
+    def abstract(value) -> Interval:
         return Interval.abstract(value)
 
     @staticmethod
