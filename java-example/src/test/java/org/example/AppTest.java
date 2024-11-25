@@ -1,6 +1,5 @@
 package org.example;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
 public class AppTest {
@@ -11,12 +10,12 @@ public class AppTest {
     }
 
     @Test
-    public static void testGetNum() {
+    public void testGetNum() {
         assert App.getNum() == 42;
     }
 
     @Test
-    public static void testAdd5() {
+    public void testAdd5() {
         assert App.add5(0) == 5;
         assert App.add5(1) == 6;
         assert App.add5(2) == 7;
@@ -24,7 +23,7 @@ public class AppTest {
     }
 
     @Test
-    public static void testConvertBytesToBits() {
+    public void testConvertBytesToBits() {
         assert App.convertBytesToBits(0) == 0;
         assert App.convertBytesToBits(1) == 8;
         assert App.convertBytesToBits(2) == 16;
@@ -32,7 +31,7 @@ public class AppTest {
     }
 
     @Test
-    public static void testFactorial() {
+    public void testFactorial() {
         assert App.factorial(0) == 1;
         assert App.factorial(1) == 1;
         assert App.factorial(2) == 2;
@@ -40,12 +39,12 @@ public class AppTest {
     }
 
     @Test
-    public static void testSomeLoops() {
+    public void testSomeLoops() {
         assert App.someLoops() == 1000000;
     }
 
     @Test
-    public static void testComplexFunction() {
+    public void testComplexFunction() {
         assert App.complexFunction(0) == 5;
         assert App.complexFunction(1) == 47;
         assert App.complexFunction(2) == 89;
@@ -53,7 +52,7 @@ public class AppTest {
     }
 
     @Test
-    public static void testInefficientFunction() {
+    public void testInefficientFunction() {
         assert App.inefficientFunction(0) == 0;
         assert App.inefficientFunction(-10) == 0;
         assert App.inefficientFunction(1) == 1;
@@ -64,12 +63,12 @@ public class AppTest {
     }
 
     @Test
-    public static void testCallingInefficientFunction() {
+    public void testCallingInefficientFunction() {
         assert App.callingInefficientFunction() == 102334155;
     }
 
     @Test
-    public static void testIsN238() {
+    public void testIsN238() {
         assert App.isN238(0) == 0;
         assert App.isN238(238) == 100;
         assert App.isN238(10) == 0;
