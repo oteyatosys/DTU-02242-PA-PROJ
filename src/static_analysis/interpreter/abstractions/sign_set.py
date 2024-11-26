@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from typing import Set, TypeAlias, Literal
 
+from static_analysis.interpreter.abstractions.bot import Bot
+
 Sign : TypeAlias = Literal["+"] | Literal["-"] | Literal["0"]
 
 @dataclass
@@ -18,6 +20,8 @@ class SignSet(frozenset[Sign]):
         return SignSet(super().__and__(other))
     
     def __or__(self, other: 'SignSet') -> 'SignSet':
+        if isinstance(other, Bot):
+            return self
         return SignSet(super().__or__(other))
     
     def __contains__(self, member: int):
