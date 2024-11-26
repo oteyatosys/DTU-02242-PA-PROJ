@@ -113,9 +113,4 @@ public class MathTest {
     public void testIsPrimeEdgeCase() {
         assert !Math.isPrime(1);
     }
-
-    @Test
-    public void testDivide2() {
-        assert Math.divide2(10, 2) == 3;
-    }
 }

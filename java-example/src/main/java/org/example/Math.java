@@ -50,8 +50,4 @@ public class Math {
         }
         return true;
     }
-
-    public static int divide2(int a, int b) {
-        return a / (b - 2);
-    }
 }
