@@ -19,6 +19,9 @@ from xml.etree import ElementTree as ET
 import tempfile
 import tqdm
 
+project_root = Path(__file__).parent.parent.parent
+project_tmp_dir = project_root / "tmp"
+
 l.basicConfig(level=l.INFO)
 
 @dataclass
@@ -65,7 +68,8 @@ class Evaluator:
     ) -> TestScenarioResult:
         maven_project = test_scenario.maven_project
 
-        with tempfile.TemporaryDirectory() as tmp_dir:
+        project_tmp_dir.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(dir=project_tmp_dir) as tmp_dir:
             tmp_dir = Path(tmp_dir)
 
             maven_project_copy = tmp_dir / maven_project.name
