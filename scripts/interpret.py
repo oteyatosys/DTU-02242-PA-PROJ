@@ -16,7 +16,7 @@ from static_analysis.interpreter.abstractions.interval import Interval
 
 import logging as l
 
-l.basicConfig(level=l.INFO)
+l.basicConfig(level=l.DEBUG)
 
 def run_without_parameters(interpreter: AbstractInterpreter, signature: MethodSignature):
     pc = PC(signature, 0)
@@ -40,8 +40,15 @@ def run_all_tests():
         run_without_parameters(interpreter, method.signature)
         print()
 
+def run_one_test(signature_str : str):
+    program = Program.load(project_root / "data" / "new")
+    interpreter = AbstractIntervalInterpreter(program)
+    signature = MethodSignature.from_str(signature_str)
+    run_without_parameters(interpreter, signature)
+
 def main():
-    run_all_tests()
+    # run_all_tests()
+    run_one_test("org/example/MathTest.testGcd:()V")
 
 if __name__ == "__main__":
     main()
