@@ -32,6 +32,9 @@ class SignArithmetic(Arithmetic[SignSet]):
 
             elif opr == "div":
                 result_set |= self._div(left, right)
+            
+            elif opr == "rem":
+                result_set |= self._div(left, right)
 
             else:
                 raise NotImplementedError(f"can't handle {opr!r}")
@@ -95,6 +98,11 @@ class SignArithmetic(Arithmetic[SignSet]):
         
         return { "-" }
 
+    def _rem(self, a: Sign, b: Sign) -> Set[Sign]:
+        if b == "0":
+            raise ZeroDivisionError()
+        
+        return a
 
     def compare(self, opr: str, a: SignSet, b: SignSet) -> BoolSet:
         combinations = itertools.product(a, b)

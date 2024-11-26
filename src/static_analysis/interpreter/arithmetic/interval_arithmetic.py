@@ -34,6 +34,13 @@ class IntervalArithmetic(Arithmetic[Interval]):
                 lower_bound = min(a.lb // b.lb, a.lb // b.ub, a.ub // b.lb, a.ub // b.ub)
                 upper_bound = max(a.lb // b.lb, a.lb // b.ub, a.ub // b.lb, a.ub // b.ub)
                 return Interval(lower_bound, upper_bound)
+        elif opr == "rem":
+            if 0 in b :
+                raise ZeroDivisionError
+            else :
+                lower_bound = min(a.lb % b.lb, a.lb % b.ub, a.ub % b.lb, a.ub % b.ub)
+                upper_bound = max(a.lb % b.lb, a.lb % b.ub, a.ub % b.lb, a.ub % b.ub)
+                return Interval(lower_bound, upper_bound)
         else:
             raise NotImplementedError(f"can't handle {opr!r}")
 
