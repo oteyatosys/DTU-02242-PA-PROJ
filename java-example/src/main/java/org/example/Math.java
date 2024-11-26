@@ -14,12 +14,14 @@ public class Math {
 
     // Calculate the greatest common divisor (GCD) of two integers
     public static int gcd(int a, int b) {
+        a = abs(a);
+        b = abs(b);
         while (b != 0) {
             int temp = b;
             b = a % b;
             a = temp;
         }
-        return abs(a);
+        return a;
     }
 
     // Calculate the least common multiple (LCM) using GCD
