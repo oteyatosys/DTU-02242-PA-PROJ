@@ -87,38 +87,6 @@ class AbstractInterpreter:
     def step_binary(self, bc: list, pc: PC, astate: AbstractState):
         raise NotImplementedError("step_binary")
 
-    # def step_binary(self, bc: list, pc: PC, astate: AbstractState):
-    #     new_state = astate.copy()
-
-    #     right = new_state.stack.pop()
-    #     left = new_state.stack.pop()
-
-    #     arithmetic = self.get_arithmetic(left)
-
-    #     try:
-    #         result = arithmetic.binary(bc["operant"], left, right)
-    #         new_state.stack.append(result)
-
-    #         yield (pc.next(), NextState(new_state))
-    #     except ZeroDivisionError:
-    #         new_state.done = "zero division"
-    #         self.errors.add("zero division")
-    #         yield (-1, NextState(new_state))
-
-    #         right1 = right and Interval(float("-inf"),-1)
-    #         right2 = right and Interval(1,float("inf"))
-    #         if right1 != Interval.bot() :
-    #             new_state1 = astate.copy()
-    #             new_state1.stack[-1] = right1
-    #             for res in self.step_binary(bc, pc, new_state1):
-    #                 yield res 
-                    
-    #         if right2 != Interval.bot() :
-    #             new_state2 = astate.copy()          
-    #             new_state2.stack[-1] = right2
-    #             for res in self.step_binary(bc, pc, new_state2):
-    #                 yield res
-
     def step_load(self, bc: list, pc: PC, astate: AbstractState):
         new_state = astate.copy()
 
