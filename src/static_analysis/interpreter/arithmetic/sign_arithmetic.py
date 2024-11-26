@@ -129,7 +129,7 @@ class SignArithmetic(Arithmetic[SignSet]):
 
 
     def _le (self, a: Sign, b: Sign) -> BoolSet:
-        return Arithmetic.lt(a, b) | Arithmetic.eq(a, b)
+        return self._lt(a, b) | self._eq(a, b)
     
     def _lt (self, a: Sign, b: Sign) -> BoolSet:
         match (a, b):
@@ -153,7 +153,7 @@ class SignArithmetic(Arithmetic[SignSet]):
             case (_, _): return BoolSet( True )
     
     def _ge (self, a: Sign, b: Sign) -> BoolSet:
-        return Arithmetic.gt(a, b) | Arithmetic.eq(a, b)
+        return self._gt(a, b) | self._eq(a, b)
     
     def _gt (self, a: Sign, b: Sign) -> BoolSet:
         match (a, b):
