@@ -111,7 +111,7 @@ class AbstractInterpreter:
     def step_throw(self, bc: list, pc: PC, astate: AbstractState):
         new_state = astate.copy()
 
-        error: object = next(iter(new_state.stack.pop()))
+        error: object = new_state.stack.pop()
 
         self.errors.add(error)
 
@@ -230,7 +230,9 @@ class AbstractInterpreter:
         new_state = astate.copy()
 
         if bc["class"] == "java/lang/AssertionError":
-            new_state.stack.append(frozenset(["assertion error"]))
+            new_state.stack.append("assertion error")
+        elif bc["class"] == "java/lang/RuntimeException":
+            new_state.stack.append("java/lang/RuntimeException")
         else:
             raise NotImplementedError(f"can't handle {bc!r}")
 

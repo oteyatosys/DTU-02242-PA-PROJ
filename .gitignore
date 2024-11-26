@@ -166,3 +166,4 @@ __pycache__/
 .pdm-python
 .DS_Store
 result.pkl
+/tmp/
