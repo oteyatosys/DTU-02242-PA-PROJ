@@ -274,6 +274,19 @@ class AbstractInterpreter:
 
         yield (pc.next(), NextState(new_state))
 
+    def step_incr(self, bc: list, pc: PC, astate: AbstractState):
+        new_state = astate.copy()
+
+        index = bc["index"]
+        
+        left = new_state.locals[index]
+        arithmetic = self.get_arithmetic(left)
+        right = arithmetic.from_int(bc["amount"])
+
+        new_state.locals[index] = arithmetic.binary("add", left, right)
+
+        yield (pc.next(), NextState(new_state))
+
     def get_arithmetic(self, value):
         raise NotImplementedError("get_arithmetic")
 
