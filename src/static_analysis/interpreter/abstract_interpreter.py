@@ -71,7 +71,8 @@ class AbstractInterpreter:
             s_: Action
 
             if pc_ == -1:
-                self.final.add(s_)
+                l.debug(f"Final state: {repr(s_)}")
+                # self.final.add(s_)
             else:
                 yield (pc_, s_)
 
