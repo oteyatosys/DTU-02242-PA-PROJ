@@ -26,7 +26,7 @@ l.basicConfig(level=l.INFO)
 
 @dataclass
 class Evaluator:
-    max_workers: int = 8
+    max_workers: int = 7
 
     def evaluate_suite(
         self,
@@ -125,6 +125,7 @@ class Evaluator:
         all_test_time = None
 
         if stage.ground_truth is None:
+
             start_time = timer()
             
             subprocess.run(
@@ -175,7 +176,7 @@ class Evaluator:
             same_class_methods[signature.class_name].add(signature.name)
 
         params = [
-            f"k#{"+".join(v)}" for k, v in same_class_methods.items()
+            f"{k}#{"+".join(v)}" for k, v in same_class_methods.items()
         ]
 
         return ",".join(params)

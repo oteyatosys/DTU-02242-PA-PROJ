@@ -263,6 +263,7 @@ class TestSuiteResult:
         print(f" Test time std deviation: {self.compute_test_time_std_deviation()}")
         print(f" Mean subset test time (s): {self.compute_mean_subset_test_time()}")
         print(f" Subset test time variance: {self.compute_subset_test_time_variance()}")
+        print(f" Subset test time std deviation: {self.compute_subset_test_time_std_deviation()}")
         print(f"-- Confusion Matrix Metrics --")
         print(f" Total true positives: {self.compute_total_true_positive_count()}")
         print(f" Total false positives: {self.compute_total_false_positive_count()}")
