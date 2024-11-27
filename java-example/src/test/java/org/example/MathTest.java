@@ -46,7 +46,7 @@ public class MathTest {
 
     @Test
     public void testGcdWithZero() {
-        assert Math.gcd(0, 5) == 5;
+        assert Math.gcd(5, 0) == 5;
     }
 
     @Test
@@ -100,17 +100,17 @@ public class MathTest {
     }
 
     @Test
-    public void testIsPrimeTrue() {
+    public void testIsPrime17() {
         assert Math.isPrime(17);
     }
 
     @Test
-    public void testIsPrimeFalse() {
+    public void testIsPrime18() {
         assert !Math.isPrime(18);
     }
 
     @Test
-    public void testIsPrimeEdgeCase() {
+    public void testIsPrime1() {
         assert !Math.isPrime(1);
     }
 }
