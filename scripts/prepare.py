@@ -7,8 +7,8 @@ project_root = Path(__file__).parent.parent
 
 def main():
     perform_data_rotation(
-        Path("java-example"),
-        Path("data")
+        project_root / "java-example",
+        project_root / "data"
     )
 
 if __name__ == "__main__":
