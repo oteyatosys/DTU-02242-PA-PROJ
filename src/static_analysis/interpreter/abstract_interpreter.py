@@ -1,6 +1,6 @@
 from typing import Dict, Iterable, List, Set, Tuple
 from static_analysis.interpreter.common import PC, NextState, ReturnValue, Action
-from static_analysis.interpreter.abstractions import AbstractState, BoolSet, Bot
+from static_analysis.interpreter.abstractions import AbstractState, BoolSet, Bot, RefSet
 from reader import Program, MethodSignature
 import logging as l
 
@@ -229,12 +229,11 @@ class AbstractInterpreter:
     def step_new(self, bc: list, pc: PC, astate: AbstractState):
         new_state = astate.copy()
 
-        if bc["class"] == "java/lang/AssertionError":
-            new_state.stack.append("assertion error")
-        elif bc["class"] == "java/lang/RuntimeException":
-            new_state.stack.append("java/lang/RuntimeException")
-        else:
-            raise NotImplementedError(f"can't handle {bc!r}")
+        match bc["class"]:
+            case "java/lang/AssertionError" | "java/lang/RuntimeException":
+                new_state.stack.append(RefSet({bc["class"]}))
+            case _:
+                raise NotImplementedError(f"can't handle {bc!r}")
 
         yield (pc.next(), NextState(new_state))
 
