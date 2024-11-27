@@ -24,9 +24,13 @@ def run_without_parameters(interpreter: AbstractInterpreter, signature: MethodSi
 
     touched = interpreter.analyse(pc, initial_state)
 
+    print(f"Running {signature}")
+    print("=================================")
+
     for sig, offsets in touched.items():
         print(sig)
         print("  ", ", ".join(map(str, offsets)))
+    print()
 
 def run_all_tests():
     program = Program.load(project_root / "data" / "new")
@@ -35,10 +39,7 @@ def run_all_tests():
     # interpreter = AbstractSignInterpreter(program)
 
     for _, method in program.all_test_methods():
-        print(f"Running {method.signature}")
-        print("=================================")
         run_without_parameters(interpreter, method.signature)
-        print()
 
 def run_one_test(signature_str : str):
     program = Program.load(project_root / "data" / "new")
@@ -47,8 +48,8 @@ def run_one_test(signature_str : str):
     run_without_parameters(interpreter, signature)
 
 def main():
-    # run_all_tests()
-    run_one_test("org/example/MathTest.testGcd:()V")
+    run_all_tests()
+    # run_one_test("org/example/MathTest.testIsPrime17:()V")
 
 if __name__ == "__main__":
     main()
