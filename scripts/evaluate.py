@@ -1,4 +1,4 @@
-
+from argparse import ArgumentParser
 from pathlib import Path
 from evaluation.evaluator import Evaluator
 from evaluation.results import TestSuiteResult
@@ -16,9 +16,19 @@ from reader.method_signature import MethodSignature
 project_root = Path(__file__).parent.parent
 
 def main():
-    evaluator = Evaluator()
+    parser = ArgumentParser(description="Run test suite evaluation with specified predictor.")
+    parser.add_argument("predictor", choices=["sign", "interval", "callgraph"], help="The predictor to use for the evaluation.")
+    parser.add_argument("--no-threads", action="store_true", help="Disable threading for the evaluation.")
+    args = parser.parse_args()
+    
+    evaluator = Evaluator(0 if args.no_threads else None)
 
-    predictor: TestPredictor = AbstractIntervalPredictor()
+    if args.predictor == "sign":
+        predictor: TestPredictor = AbstractSignPredictor()
+    elif args.predictor == "interval":
+        predictor: TestPredictor = AbstractIntervalPredictor()
+    elif args.predictor == "callgraph":
+        predictor: TestPredictor = CallGraphPredictor()
 
     builder = TestSuiteBuilder(project_root / "java-example")
 
@@ -146,4 +156,3 @@ if __name__ == "__main__":
     result: TestSuiteResult = load_result()
 
     result.print_stats()
-    
