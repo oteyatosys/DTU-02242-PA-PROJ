@@ -1,53 +1,19 @@
-from dataclasses import dataclass
-from typing import Any, Dict, Iterable, List, Set, Tuple
-from static_analysis.interpreter.abstractions import AbstractState, BoolSet, SignSet, Bot
-from static_analysis.interpreter.arithmetic.arithmetic import Arithmetic
+from typing import Dict, Iterable, List, Set, Tuple
+from static_analysis.interpreter.common import PC, NextState, ReturnValue, Action
+from static_analysis.interpreter.abstractions import AbstractState, BoolSet, Bot, RefSet
 from reader import Program, MethodSignature
-from jpamb_utils import JvmType
 import logging as l
 
-@dataclass(frozen=True)
-class NextState:
-    next_state: AbstractState
-
-@dataclass(frozen=True)
-class ReturnValue:
-    value: Any
-    param_count: int
-
-Action = NextState | ReturnValue
-
-@dataclass(frozen=True)
-class PC:
-    signature: MethodSignature
-    offset: int
-
-    def __add__(self, i: int):
-        return PC(self.signature, self.offset + i)
-    
-    def __sub__(self, i: int):
-        return PC(self.signature, self.offset - i)
-    
-    def next(self) -> 'PC':
-        return self + 1
-    
-    def prev(self) -> 'PC':
-        return self - 1
-    
-    def jump(self, i: int) -> 'PC':
-        return PC(self.signature, i)
-    
-    def __lt__(self, other: 'PC') -> bool:
-        return self.signature < other.signature or self.offset < other.offset
-
-
 class AbstractInterpreter:
-    def __init__(self, program: Program, arithmetic: Arithmetic):
+    def __init__(self, program: Program):
         self.program = program
-        self.arithmetic = arithmetic
         self.generated = 0
         self.final = set()
         self.errors = set()
+        
+        # Must be set up by the subclass
+        self.int_arithmetic = None
+        self.bool_arithmetic = None
 
     def analyse(self, pc: PC, initial_state: AbstractState) -> Dict[MethodSignature, Set[int]]:
         states: Dict[PC, AbstractState] = {pc: initial_state}
@@ -74,7 +40,7 @@ class AbstractInterpreter:
 
  
                 old = states.get(next_pc, Bot())
-                new_state = old | next_state
+                new_state = self.join_states(old, next_state)
 
                 if old != new_state:
                     states[next_pc] = new_state
@@ -92,6 +58,9 @@ class AbstractInterpreter:
         
         return touched
 
+    def join_states(self, old: AbstractState, new: AbstractState):
+        raise NotImplementedError("join_states")
+
     def step(self, pc: PC, astate: AbstractState) -> Iterable[Tuple[PC, Action]]:
         bc = self.program.method(pc.signature).bytecode[pc.offset]
 
@@ -102,7 +71,8 @@ class AbstractInterpreter:
             s_: Action
 
             if pc_ == -1:
-                self.final.add(s_)
+                l.debug(f"Final state: {repr(s_)}")
+                # self.final.add(s_)
             else:
                 yield (pc_, s_)
 
@@ -116,28 +86,7 @@ class AbstractInterpreter:
         yield (pc.jump(bc["target"]), NextState(astate.copy()))
 
     def step_binary(self, bc: list, pc: PC, astate: AbstractState):
-        new_state = astate.copy()
-
-        right = new_state.stack.pop()
-        left = new_state.stack.pop()
-
-        try:
-            result = self.arithmetic.binary(bc["operant"], left, right)
-            new_state.stack.append(result)
-
-            yield (pc.next(), NextState(new_state))
-        except ZeroDivisionError:
-            new_state.done = "zero division"
-            self.errors.add("zero division")
-            yield (-1, NextState(new_state))
-
-            right -= SignSet({'0'})
-
-            new_state = astate.copy()
-            new_state.stack[-1] = right
-
-            for res in self.step_binary(bc, pc, new_state):
-                yield res
+        raise NotImplementedError("step_binary")
 
     def step_load(self, bc: list, pc: PC, astate: AbstractState):
         new_state = astate.copy()
@@ -162,7 +111,7 @@ class AbstractInterpreter:
     def step_throw(self, bc: list, pc: PC, astate: AbstractState):
         new_state = astate.copy()
 
-        error: object = next(iter(new_state.stack.pop()))
+        error: object = new_state.stack.pop()
 
         self.errors.add(error)
 
@@ -198,8 +147,9 @@ class AbstractInterpreter:
         new_state = astate.copy()
 
         left = new_state.stack.pop()
+        arithmetic = self.get_arithmetic(left)
 
-        new_state.stack.append(self.arithmetic.negate(left))
+        new_state.stack.append(arithmetic.negate(left))
 
         yield (pc.next(), NextState(new_state))
 
@@ -221,11 +171,11 @@ class AbstractInterpreter:
 
         if type == "integer":
             new_state.stack.append(
-                SignSet.abstract({value})
+                self.int_arithmetic.abstract({value})
             )
         elif type == "boolean":
             new_state.stack.append(
-                BoolSet.abstract({value})
+                self.bool_arithmetic.abstract({value})
             )
         else:
             new_state.stack.append(value)
@@ -251,15 +201,13 @@ class AbstractInterpreter:
         else:
             yield (-1, ReturnValue(None, param_count))
             
-
-    # Stepping functions are now generators that can generate different 
-    # states depending on the abstract state.
     def step_ifz(self, bc: list, pc: PC, astate: AbstractState):
-        # depending on the defintion of the abstract_state 
         left = astate.stack.pop()
-        # Note that the abstract value might both compare and not compare to 0
-        for b in self.arithmetic.compare(bc["condition"], left, SignSet({'0'})):
-            l.debug(f"Comparing {left} to 0 {bc['condition']}: {b}")
+        arithmetic = self.get_arithmetic(left)
+        right = arithmetic.from_int(0)
+
+        for b in arithmetic.compare(bc["condition"], left, right):
+            l.debug(f"Comparing {left} to {right} {bc['condition']}: {b}")
             if b:
                 yield (pc.jump(bc["target"]), NextState(astate.copy()))
             else:
@@ -269,7 +217,10 @@ class AbstractInterpreter:
         right = astate.stack.pop()
         left = astate.stack.pop()
 
-        for b in self.arithmetic.compare(bc["condition"], left, right):
+        arithmetic = self.get_arithmetic(left)
+
+        for b in arithmetic.compare(bc["condition"], left, right):
+            l.debug(f"Comparing {left} to {right} {bc['condition']}: {b}")
             if b:
                 yield (pc.jump(bc["target"]), NextState(astate.copy()))
             else:
@@ -278,10 +229,11 @@ class AbstractInterpreter:
     def step_new(self, bc: list, pc: PC, astate: AbstractState):
         new_state = astate.copy()
 
-        if bc["class"] == "java/lang/AssertionError":
-            new_state.stack.append(frozenset(["assertion error"]))
-        else:
-            raise NotImplementedError(f"can't handle {bc!r}")
+        match bc["class"]:
+            case "java/lang/AssertionError" | "java/lang/RuntimeException":
+                new_state.stack.append(RefSet({bc["class"]}))
+            case _:
+                raise NotImplementedError(f"can't handle {bc!r}")
 
         yield (pc.next(), NextState(new_state))
 
@@ -292,14 +244,21 @@ class AbstractInterpreter:
 
         yield (pc.next(), NextState(new_state))
 
+    def step_incr(self, bc: list, pc: PC, astate: AbstractState):
+        new_state = astate.copy()
 
-def generate_arguments(params: list[JvmType]):
-    for param in params:
-        if param == "int":
-            yield SignSet.top()
-        elif param == "boolean":
-            yield BoolSet.top()
-        else:
-            raise NotImplementedError(f"can't handle {param!r}")
+        index = bc["index"]
+        
+        left = new_state.locals[index]
+        arithmetic = self.get_arithmetic(left)
+        right = arithmetic.from_int(bc["amount"])
+
+        new_state.locals[index] = arithmetic.binary("add", left, right)
+
+        yield (pc.next(), NextState(new_state))
+
+    def get_arithmetic(self, value):
+        raise NotImplementedError("get_arithmetic")
+
 
 

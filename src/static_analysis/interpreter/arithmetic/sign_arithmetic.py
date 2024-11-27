@@ -9,6 +9,12 @@ from static_analysis.interpreter.arithmetic.arithmetic import Arithmetic
 class SignArithmetic(Arithmetic[SignSet]):
     _order: Tuple[Sign] = ("-", "0", "+")
 
+    def abstract(self, value) -> SignSet:
+        return SignSet.abstract(value)
+
+    def from_int(self, i: int) -> SignSet:
+        return self.abstract({i})
+
     def binary(self, opr: str, left: SignSet, right: SignSet) -> SignSet:
         combinations = itertools.product(left, right)
 
@@ -25,6 +31,9 @@ class SignArithmetic(Arithmetic[SignSet]):
                 result_set |= self._mul(left, right)
 
             elif opr == "div":
+                result_set |= self._div(left, right)
+            
+            elif opr == "rem":
                 result_set |= self._div(left, right)
 
             else:
@@ -89,6 +98,11 @@ class SignArithmetic(Arithmetic[SignSet]):
         
         return { "-" }
 
+    def _rem(self, a: Sign, b: Sign) -> Set[Sign]:
+        if b == "0":
+            raise ZeroDivisionError()
+        
+        return a
 
     def compare(self, opr: str, a: SignSet, b: SignSet) -> BoolSet:
         combinations = itertools.product(a, b)
@@ -115,52 +129,37 @@ class SignArithmetic(Arithmetic[SignSet]):
 
 
     def _le (self, a: Sign, b: Sign) -> BoolSet:
-        if a != b:
-            return BoolSet( self._order.index(a) <= self._order.index(b) )
-        
-        if a == "0":
-            return BoolSet( True )
-        
-        return BoolSet( True, False )
+        return self._lt(a, b) | self._eq(a, b)
     
     def _lt (self, a: Sign, b: Sign) -> BoolSet:
-        if a != b:
-            return BoolSet(self._order.index(a) < self._order.index(b))
-        
-        if a == "0":
-            return BoolSet( False )
-        
-        return BoolSet( True, False )
+        match (a, b):
+            case ("+", "+"): return BoolSet( True, False )
+            case ("+", _): return BoolSet( False )
+            case ("0", "+"): return BoolSet( True )
+            case ("0", _): return BoolSet( False )
+            case ("-", "-"): return BoolSet( True, False )
+            case ("-", _): return BoolSet( True )
     
     def _eq (self, a: Sign, b: Sign) -> BoolSet:
-        if a == "0" and b == "0":
-            return BoolSet( True )
-        
-        if a != b:
-            return BoolSet( False )
-
-        return BoolSet( True, False )
+        match (a, b):
+            case ("+", "+") | ("-", "-"): return BoolSet( True, False )
+            case ("0", "0"): return BoolSet( True )
+            case (_, _): return BoolSet( False )
     
     def _ne (self, a: Sign, b: Sign) -> BoolSet:
-        if a == "0" and b == "0":
-            return BoolSet( False )
-        
-        return BoolSet( True, False )
+        match (a, b):
+            case ("+", "+") | ("-", "-"): return BoolSet( True, False )
+            case ("0", "0"): return BoolSet( False )
+            case (_, _): return BoolSet( True )
     
     def _ge (self, a: Sign, b: Sign) -> BoolSet:
-        if a != b:
-            return BoolSet( self._order.index(a) >= self._order.index(b) )
-        
-        if a == "0":
-            return BoolSet( True )
-        
-        return BoolSet( True, False )
+        return self._gt(a, b) | self._eq(a, b)
     
     def _gt (self, a: Sign, b: Sign) -> BoolSet:
-        if a != b:
-            return BoolSet( self._order.index(a) > self._order.index(b) )
-        
-        if a == "0":
-            return BoolSet( False )
-        
-        return BoolSet( True, False )
+        match (a, b):
+            case ("+", "+"): return BoolSet( True, False )
+            case ("+", _): return BoolSet( True )
+            case ("0", "+" | "0"): return BoolSet( False )
+            case ("0", "-"): return BoolSet( True )
+            case ("-", "-"): return BoolSet( True, False )
+            case ("-", _): return BoolSet( False )

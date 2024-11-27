@@ -2,8 +2,9 @@ from dataclasses import dataclass
 from typing import Union
 
 from static_analysis.interpreter.abstractions.bool_set import BoolSet
-from static_analysis.interpreter.abstractions.itval import Interval
+from static_analysis.interpreter.abstractions.interval import Interval
 from static_analysis.interpreter.abstractions.sign_set import SignSet
+from static_analysis.interpreter.abstractions.bot import Bot
 
 AbstractValue = Union[SignSet, BoolSet, Interval]
 
@@ -27,7 +28,7 @@ class AbstractState:
         self.ensure_compatability(other)
         stack_meet = [s1 & s2 for s1, s2 in zip(other.stack, self.stack)]
         locals_meet = {
-            key: self.locals.get(key) & other.locals.get(key)
+            key: self.locals.get(key, Bot()) & other.locals.get(key, Bot())
             for key in set(self.locals) | set(other.locals)
         }
         return AbstractState(stack=stack_meet, locals=locals_meet)
@@ -37,7 +38,7 @@ class AbstractState:
         self.ensure_compatability(other)
         stack_join = [s1 | s2 for s1, s2 in zip(other.stack, self.stack)]
         locals_join = {
-            key: self.locals.get(key) | other.locals.get(key)
+            key: self.locals.get(key, Bot()) | other.locals.get(key, Bot())
             for key in set(self.locals) | set(other.locals)
         }
         return AbstractState(stack=stack_join, locals=locals_join)
@@ -61,8 +62,6 @@ class AbstractState:
     def ensure_compatability(self, other: 'AbstractState'):
         if len(self.stack) != len(other.stack):
             raise ValueError("Stacks must be of the same length")
-        if len(self.locals) != len(other.locals):
-            raise ValueError("Locals must be of the same length")
     
     def widening(self, K: set[int], other: 'AbstractState') -> 'AbstractState':
         self.ensure_compatability(other)
@@ -77,11 +76,15 @@ class AbstractState:
 
         locals_widening = {}
         for key in set(self.locals) | set(other.locals):
-            s1 = self.locals.get(key)
-            s2 = other.locals.get(key)
+            s1 = self.locals.get(key, Bot())
+            s2 = other.locals.get(key, Bot())
             match s1, s2:
                 case (Interval(), Interval()):
                     locals_widening[key] = s1.widening(K, s2)
+                case (_, Bot()):
+                    locals_widening[key] = s1
+                case (Bot(), _):
+                    locals_widening[key] = s2
                 case _:
                     locals_widening[key] = s1 | s2
 
@@ -90,6 +93,3 @@ class AbstractState:
     @staticmethod
     def bot():
         return AbstractState([], {})
-    
-
-    

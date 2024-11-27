@@ -3,7 +3,7 @@
 from pathlib import Path
 import sys
 
-from prediction.abstract_predictor import AbstractPredictor
+from prediction.abstract_sign_predictor import AbstractSignPredictor
 from prediction.call_graph_predictor import CallGraphPredictor
 from prediction.predictor import TestPredictor
 
@@ -25,7 +25,7 @@ def main():
     new_program = Program.load(new_dir)
     old_program = Program.load(old_dir)
 
-    predictor: TestPredictor = AbstractPredictor()
+    predictor: TestPredictor = AbstractSignPredictor()
 
     test: Set[MethodSignature] = predictor.predict(old_program, new_program)
 

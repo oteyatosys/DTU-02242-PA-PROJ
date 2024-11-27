@@ -5,14 +5,13 @@ import jsondiff
 from prediction.predictor import TestPredictor
 from reader.method import Method
 from reader.method_signature import MethodSignature
-from static_analysis.interpreter.abstract_interpreter import PC, AbstractInterpreter
+from static_analysis.interpreter.abstract_sign_interpreter import PC, AbstractSignInterpreter
 from static_analysis.interpreter.abstractions.abstract_state import AbstractState
-from static_analysis.interpreter.arithmetic.sign_arithmetic import SignArithmetic
 from syntactic_analysis.bytecode.call_graph import CallGraph, build_call_graph
 import logging as l
 
 @dataclass
-class AbstractPredictor(TestPredictor):
+class AbstractSignPredictor(TestPredictor):
     def _remove_offsets(self, bytecode):
         if isinstance(bytecode, dict):
             return {k: self._remove_offsets(v) for k, v in bytecode.items() if k != 'offset'}
@@ -58,12 +57,28 @@ class AbstractPredictor(TestPredictor):
                 l.debug(f"Method {new_signature} has changed:")
                 tests_to_analyse.add(start_node)
 
+                changed = set(diff.keys()) - {jsondiff.insert, jsondiff.delete}
+
+                inserts = diff.get(jsondiff.insert, [])
+                deletions = diff.get(jsondiff.delete, [])
+
+                inserted_indexes = [
+                    insert[0]
+                    for insert in inserts
+                ]
+                
+                deleted_indexes = [
+                    deletion[0]
+                    for deletion in deletions
+                ]
+
+                changed.update(inserted_indexes)
+                changed.update(deleted_indexes)
+
                 self._add_offsets(
                     changed_bc, 
-                    start_node,
-                    set(
-                        diff.keys()
-                    )
+                    new_signature,
+                    changed
                 )
 
                 return True
@@ -77,12 +92,8 @@ class AbstractPredictor(TestPredictor):
 
         test_predictions: Set[MethodSignature] = set()
 
-        arithmetic = SignArithmetic()
         for test_signature in tests_to_analyse:
-            interpreter = AbstractInterpreter(
-                program = new_program,
-                arithmetic = arithmetic,
-            )
+            interpreter = AbstractSignInterpreter(new_program)
 
             pc = PC(test_signature, 0)
             initial_state = AbstractState([], {})

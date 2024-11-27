@@ -5,18 +5,16 @@ import jsondiff
 from prediction.predictor import TestPredictor
 from reader.method import Method
 from reader.method_signature import MethodSignature
-from static_analysis.interpreter.abstract_interpreter import PC, AbstractInterpreter
+from static_analysis.interpreter.abstract_sign_interpreter import PC
 from static_analysis.interpreter.abstractions.abstract_state import AbstractState
-from static_analysis.interpreter.arithmetic.interval_arithmetic import IntervalArithmetic
-from static_analysis.interpreter.arithmetic.sign_arithmetic import SignArithmetic
-from static_analysis.interpreter.it_abstract_interpreter import ItAbstractInterpreter
+from static_analysis.interpreter.abstract_interval_interpreter import AbstractIntervalInterpreter
 from syntactic_analysis.bytecode.call_graph import CallGraph, build_call_graph
 import logging as l
 
 from syntactic_analysis.scanner import get_int_literals
 
 @dataclass
-class ItAbstractPredictor(TestPredictor):
+class AbstractIntervalPredictor(TestPredictor):
     def _remove_offsets(self, bytecode):
         if isinstance(bytecode, dict):
             return {k: self._remove_offsets(v) for k, v in bytecode.items() if k != 'offset'}
@@ -62,12 +60,28 @@ class ItAbstractPredictor(TestPredictor):
                 l.debug(f"Method {new_signature} has changed:")
                 tests_to_analyse.add(start_node)
 
+                changed = set(diff.keys()) - {jsondiff.insert, jsondiff.delete}
+
+                inserts = diff.get(jsondiff.insert, [])
+                deletions = diff.get(jsondiff.delete, [])
+
+                inserted_indexes = [
+                    insert[0]
+                    for insert in inserts
+                ]
+                
+                deleted_indexes = [
+                    deletion[0]
+                    for deletion in deletions
+                ]
+
+                changed.update(inserted_indexes)
+                changed.update(deleted_indexes)
+
                 self._add_offsets(
                     changed_bc, 
-                    start_node,
-                    set(
-                        diff.keys()
-                    )
+                    new_signature,
+                    changed
                 )
 
                 return True
@@ -81,15 +95,8 @@ class ItAbstractPredictor(TestPredictor):
 
         test_predictions: Set[MethodSignature] = set()
 
-        interesting_values = get_int_literals(new_program)
-
-        arithmetic = IntervalArithmetic()
         for test_signature in tests_to_analyse:
-            interpreter = ItAbstractInterpreter(
-                program = new_program,
-                arithmetic = arithmetic,
-                interesting_values=interesting_values
-            )
+            interpreter = AbstractIntervalInterpreter(new_program)
 
             pc = PC(test_signature, 0)
             initial_state = AbstractState([], {})

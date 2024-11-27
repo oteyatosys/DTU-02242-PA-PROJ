@@ -21,8 +21,6 @@ class Interval():
         return Interval(lower_bounds,upper_bounds)
     
     def __or__(self, other: 'Interval') -> 'Interval':
-        if isinstance(other, set):
-            return self
         return Interval(min(self.lb,other.lb),max(self.ub,other.ub))
     
     def __contains__(self, member: int):
@@ -32,15 +30,11 @@ class Interval():
         return f"[{self.lb}, {self.ub}]"
     
     def widening(self, K : set[int], other: 'Interval'):
-        if isinstance(other, set):
-            other = Interval.bot()
         lower_bounds = max((k for k in K if k <= min(self.lb,other.lb)), default=float("-inf"))
         upper_bounds = min((k for k in K if k >= max(self.ub,other.ub)), default=float("inf"))
         return Interval(lower_bounds,upper_bounds)
         
     def __eq__(self, value):
-        if not(isinstance(value,Interval)):
-            return False
         return self.lb == value.lb and self.ub == value.ub
     
     def __repr__(self):

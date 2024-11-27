@@ -1,6 +1,6 @@
 from hypothesis import given
 from hypothesis.strategies import integers, sets
-from static_analysis.interpreter.abstractions.itval import Interval
+from static_analysis.interpreter.abstractions.interval import Interval
 from static_analysis.interpreter.arithmetic.interval_arithmetic import IntervalArithmetic
 
 @given(sets(integers()), sets(integers()))

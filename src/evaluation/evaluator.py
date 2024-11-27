@@ -19,6 +19,9 @@ from xml.etree import ElementTree as ET
 import tempfile
 import tqdm
 
+project_root = Path(__file__).parent.parent.parent
+project_tmp_dir = project_root / "tmp"
+
 l.basicConfig(level=l.INFO)
 
 @dataclass
@@ -36,20 +39,25 @@ class Evaluator:
         total_stages = sum(len(scenario.stages) for scenario in test_suite.scenarios)
         progress_bar = tqdm.tqdm(total=total_stages, desc="Scenarios", position=0)
 
-        with ThreadPoolExecutor(max_workers = self.max_workers) as executor:
-            future_to_scenario = {
-                executor.submit(self.evaluate_scenario, predictor, scenario, progress_bar): scenario
-                for scenario in test_suite.scenarios
-            }
+        start = timer()
 
-            start = timer()
-
-            for future in as_completed(future_to_scenario):
-                result: TestScenarioResult = future.result()
+        if self.max_workers == 0:
+            for scenario in test_suite.scenarios:
+                result = self.evaluate_scenario(predictor, scenario, progress_bar)
                 results.append(result)
+        else: 
+            with ThreadPoolExecutor(max_workers = self.max_workers) as executor:
+                future_to_scenario = {
+                    executor.submit(self.evaluate_scenario, predictor, scenario, progress_bar): scenario
+                    for scenario in test_suite.scenarios
+                }
 
-            end = timer()
+                for future in as_completed(future_to_scenario):
+                    result: TestScenarioResult = future.result()
+                    results.append(result)
         
+        end = timer()
+
         progress_bar.close()
 
         return TestSuiteResult(
@@ -65,7 +73,8 @@ class Evaluator:
     ) -> TestScenarioResult:
         maven_project = test_scenario.maven_project
 
-        with tempfile.TemporaryDirectory() as tmp_dir:
+        project_tmp_dir.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(dir=project_tmp_dir) as tmp_dir:
             tmp_dir = Path(tmp_dir)
 
             maven_project_copy = tmp_dir / maven_project.name
