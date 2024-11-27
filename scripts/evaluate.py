@@ -16,20 +16,28 @@ from reader.method_signature import MethodSignature
 project_root = Path(__file__).parent.parent
 
 def main():
-    evaluator = Evaluator()
+    evaluator = Evaluator(0)
 
     predictor: TestPredictor = AbstractIntervalPredictor()
 
     builder = TestSuiteBuilder(project_root / "java-example")
 
+    # with builder.new_scenario() as scb:
+    #     with scb.new_stage() as sb:
+    #         sb.goto("org/example/Math.java", "int negate(int n)")
+    #         sb.add("assert false;")
+    #         sb.expect_fail("org.example.MathTest.testNegate:()V")
+    #         sb.expect_fail("org.example.MathTest.testNegateNegative:()V")
+    #         sb.expect_fail("org.example.MathTest.testNegateZero:()V")
+    #         sb.expect_fail("org.example.MathTest.testAbsNegative:()V")
+
     with builder.new_scenario() as scb:
         with scb.new_stage() as sb:
-            sb.goto("org/example/Math.java", "int negate(int n)")
-            sb.add("if (true) throw new RuntimeException();")
-            sb.expect_fail("org.example.MathTest.testNegate:()V")
-            sb.expect_fail("org.example.MathTest.testNegateNegative:()V")
-            sb.expect_fail("org.example.MathTest.testNegateZero:()V")
+            sb.goto("org/example/Math.java", "int abs(int n)")
+            sb.add("assert false;")
+            sb.expect_fail("org.example.MathTest.testAbs:()V")
             sb.expect_fail("org.example.MathTest.testAbsNegative:()V")
+            sb.expect_fail("org.example.MathTest.testAbsZero:()V")
 
     test_suite = builder.build()
 
@@ -47,7 +55,7 @@ def load_result():
 if __name__ == "__main__":
     main()
 
-    # result: TestSuiteResult = load_result()
+    result: TestSuiteResult = load_result()
 
-    # result.print_stats()
+    result.print_stats()
     
