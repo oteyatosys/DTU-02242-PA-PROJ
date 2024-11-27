@@ -122,7 +122,7 @@ class Evaluator:
         prediction_time = end_time - start_time
 
         non_passing_tests: Set[MethodSignature] = None
-        test_time = None
+        all_test_time = None
 
         if stage.ground_truth is None:
             start_time = timer()
@@ -134,9 +134,22 @@ class Evaluator:
             )
 
             end_time = timer()
-            test_time = end_time - start_time
+            all_test_time = end_time - start_time
 
             ground_truth_positive = self._extract_non_passing_tests(maven_project / "target/surefire-reports")
+
+        dtest_param = self._compute_dtest_param(predicted)
+
+        start_time = timer()
+
+        subprocess.run(
+            ["mvn", "-q", "-f", str(maven_project / "pom.xml"), f"surefire:test", f"-Dtest={dtest_param}"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
+
+        end_time = timer()
+        subset_test_time = end_time - start_time
 
         stage.revert_changes(src_dir)
 
@@ -149,9 +162,23 @@ class Evaluator:
             ground_truth_negative,
             non_passing_tests,
             prediction_time,
-            test_time
+            all_test_time,
+            subset_test_time
         )
-    
+
+    def _compute_dtest_param(self, predicted: Set[MethodSignature]) -> str:
+        same_class_methods: dict[str, str] = {}
+
+        for signature in predicted:
+            if signature.class_name not in same_class_methods:
+                same_class_methods[signature.class_name] = set()
+            same_class_methods[signature.class_name].add(signature.name)
+
+        params = [
+            f"k#{"+".join(v)}" for k, v in same_class_methods.items()
+        ]
+
+        return ",".join(params)
 
     def _extract_test_results(self, report_dir) -> List[Tuple[MethodSignature, str]]:
         results: List[Tuple[MethodSignature, str]] = []

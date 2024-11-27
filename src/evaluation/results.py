@@ -12,7 +12,8 @@ class TestStageResult:
     ground_truth_negative: Set[MethodSignature]
     found_ground_truth: Set[MethodSignature]
     prediction_time: float = 0.0
-    test_time: float = 0.0
+    test_time: float = 0.0,
+    subset_test_time: float = 0.0
 
     def compute_true_positives(self) -> Set[MethodSignature]:
         return self.predicted & self.ground_truth_positive
@@ -185,6 +186,37 @@ class TestSuiteResult:
                 stage_count += 1
 
         return total_variance / stage_count
+    
+    def compute_mean_subset_test_time(self) -> float:
+        total_time_taken = 0.0
+        stage_count = 0
+        for scenario_result in self.scenario_results:
+            for stage_result in scenario_result.stage_results:
+                # Skip stages that whose test time was not recorded
+                if stage_result.subset_test_time is None:
+                    continue
+
+                total_time_taken += stage_result.subset_test_time
+                stage_count += 1
+
+        if stage_count == 0:
+            return None
+
+        return total_time_taken / stage_count
+    
+    def compute_subset_test_time_variance(self) -> float:
+        average_time_taken = self.compute_mean_subset_test_time()
+        total_variance = 0.0
+        stage_count = 0
+        for scenario_result in self.scenario_results:
+            for stage_result in scenario_result.stage_results:
+                total_variance += (stage_result.subset_test_time - average_time_taken) ** 2
+                stage_count += 1
+
+        return total_variance / stage_count
+    
+    def compute_subset_test_time_std_deviation(self) -> float:
+        return self.compute_subset_test_time_variance() ** 0.5
 
     def compute_test_time_variance(self) -> float:
         average_time_taken = self.compute_mean_test_time()
@@ -229,6 +261,8 @@ class TestSuiteResult:
         print(f" Mean test time (s): {self.compute_mean_test_time()}")
         print(f" Test time variance: {self.compute_test_time_variance()}")
         print(f" Test time std deviation: {self.compute_test_time_std_deviation()}")
+        print(f" Mean subset test time (s): {self.compute_mean_subset_test_time()}")
+        print(f" Subset test time variance: {self.compute_subset_test_time_variance()}")
         print(f"-- Confusion Matrix Metrics --")
         print(f" Total true positives: {self.compute_total_true_positive_count()}")
         print(f" Total false positives: {self.compute_total_false_positive_count()}")
