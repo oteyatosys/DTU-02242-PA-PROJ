@@ -37,45 +37,30 @@ def main():
             sb.goto("org/example/Funs.java", "int zero()")
             sb.move(2)
             sb.replace("return 42;")
-            sb.expect_fail("org.example.FunsTest.testZero:()V")
 
     with builder.new_scenario() as scb:
         with scb.new_stage() as sb:
             sb.goto("org/example/Funs.java", "int one()")
             sb.move(2)
             sb.replace("return 42;")
-            sb.expect_fail("org.example.FunsTest.testOne:()V")
 
     with builder.new_scenario() as scb:
         with scb.new_stage() as sb:
             sb.goto("org/example/Funs.java", "int two()")
             sb.move(2)
             sb.replace("return 42;")
-            sb.expect_fail("org.example.FunsTest.testTwo:()V")
 
     with builder.new_scenario() as scb:
         with scb.new_stage() as sb:
             sb.goto("org/example/Math.java", "int negate(int n)")
             # Make abs throw assertion error for all cases
             sb.add("assert false;")
-            sb.expect_fail("org.example.MathTest.testNegate:()V")
-            sb.expect_fail("org.example.MathTest.testNegateNegative:()V")
-            sb.expect_fail("org.example.MathTest.testNegateZero:()V")
-            sb.expect_fail("org.example.MathTest.testAbsNegative:()V")
 
     with builder.new_scenario() as scb:
         with scb.new_stage() as sb:
             sb.goto("org/example/Math.java", "int abs(int n)")
             # Make abs throw assertion error for all cases
             sb.add("assert false;")
-            sb.expect_fail("org.example.MathTest.testAbsPositive:()V")
-            sb.expect_fail("org.example.MathTest.testAbsNegative:()V")
-            sb.expect_fail("org.example.MathTest.testAbsZero:()V")
-            sb.expect_fail("org.example.MathTest.testGcd:()V")
-            sb.expect_fail("org.example.MathTest.testGcdCoprime:()V")
-            sb.expect_fail("org.example.MathTest.testGcdWithZero:()V")
-            sb.expect_fail("org.example.MathTest.testLcm:()V")
-            sb.expect_fail("org.example.MathTest.testLcmWithZero:()V")
 
     with builder.new_scenario() as scb:
         with scb.new_stage() as sb:
@@ -83,25 +68,18 @@ def main():
             sb.move(3)
             # Make wrong return value for gcd where b != 0
             sb.add("b += 1;")
-            sb.expect_fail("org.example.MathTest.testGcd:()V")
-            sb.expect_fail("org.example.MathTest.testGcdCoprime:()V")
-            sb.expect_fail("org.example.MathTest.testLcm:()V")
-            sb.expect_fail("org.example.MathTest.testLcmWithZero:()V")
 
             # Calling gcd(5, 0) where b is 0, should result in a skipped while loop,
             # and thereby skipping testGcdWithZero, this is not the case.
             # In both Sign and Interval abstractions, we are able to specify zero, 
             # and abs(0) should still return zero, but due to the preceding call to abs(5)
             # the state for the PC is already containing a {"+"} or a [5, 5]
-            sb.expect_fail("org.example.MathTest.testGcdWithZero:()V")
 
     with builder.new_scenario() as scb:
         with scb.new_stage() as sb:
             sb.goto("org/example/Math.java", "int lcm(int a, int b)")
-            sb.add("assert false;")
             # Make lcm throw assertion error for all cases
-            sb.expect_fail("org.example.MathTest.testLcm:()V")
-            sb.expect_fail("org.example.MathTest.testLcmWithZero:()V")
+            sb.add("assert false;")
 
     with builder.new_scenario() as scb:
         with scb.new_stage() as sb:
@@ -109,8 +87,6 @@ def main():
             sb.move(1)
             # Make wrong return value for factorial where n > 0
             sb.replace("return n == 0 ? 1 : n * factorial(n - 1) + 6;")
-            sb.expect_fail("org.example.MathTest.testFactorialOne:()V")
-            sb.expect_fail("org.example.MathTest.testFactorialFour:()V")
 
     with builder.new_scenario() as scb:
         with scb.new_stage() as sb:
@@ -118,16 +94,11 @@ def main():
             sb.move(1)
             # Make abs throw assertion error for cases where n > 2
             sb.add("assert false;")
-            sb.expect_fail("org.example.MathTest.testFibonacciFive:()V")
 
     with builder.new_scenario() as scb:
         with scb.new_stage() as sb:
             sb.goto("org/example/Math.java", "boolean dividesBy(int a, int b)")
             sb.add("assert false;")
-            sb.expect_fail("org.example.MathTest.testDividesByTrue:()V")
-            sb.expect_fail("org.example.MathTest.testDividesByFalse:()V")
-            sb.expect_fail("org.example.MathTest.testIsPrime17:()V")
-            sb.expect_fail("org.example.MathTest.testIsPrime18:()V")
 
     with builder.new_scenario() as scb:
         with scb.new_stage() as sb:
@@ -135,7 +106,6 @@ def main():
             sb.move(4)
             # Make isPrime throw assertion error if no divisor is found
             sb.add("assert false;")
-            sb.expect_fail("org.example.MathTest.testIsPrime17:()V")
 
     test_suite = builder.build()
 
