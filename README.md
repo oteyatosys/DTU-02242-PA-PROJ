@@ -24,7 +24,7 @@ The repository contains several components, including a Java example application
 
 - **scripts/**: Python scripts for executing various analysis tasks.
 
-  - `analyse.py`, `interpret.py`, `prepare.py`, and `evaluate.py`.
+  - `analyse.py`, `interpret.py`, `rotate.py`, and `evaluate.py`.
 
 - **src/**: The core Python implementation for static analysis.
 
@@ -76,11 +76,19 @@ The repository contains several components, including a Java example application
 
 ### Preparing the Data
 
-Prepare the data for analysis:
+To prepare the Java example project for interpretation, use the following command:
 
 ```sh
-pdm run prepare
+pdm run rotate
 ```
+
+The `rotate` script performs the following actions:
+
+- Moves the current `data/new` directory to `data/old`.
+- Copies the `java-example` project to `data/new`.
+- Compiles the Java project and converts the bytecode to JSON for analysis.
+
+Changes can be made in the `java-example` project, and `rotate` can be run again to create two program versions (`data/old` and `data/new`) for analysis to manually test change detection.
 
 ### Running the Analysis
 
@@ -93,15 +101,18 @@ pdm run analyse -h
 **Usage**:
 
 ```
-usage: -c [-h] {sign,interval,callgraph}
+usage: -c [-h] [--new NEW] [--old OLD] {sign,interval,callgraph}
 
-Debug tool to run a predictive test selection on the programs in the data directory.
+Debug tool to run a predictive test selection using specified program directories.
 
 positional arguments:
-  {sign,interval,callgraph}  The predictor to use for the analysis.
+  {sign,interval,callgraph}
+                        The predictor to use for the analysis.
 
 options:
-  -h, --help                 Show this help message and exit
+  -h, --help            show this help message and exit
+  --new NEW             Path to the new program directory.
+  --old OLD             Path to the old program directory.
 ```
 
 ### Interpreting the Results
@@ -115,18 +126,18 @@ pdm run interpret -h
 **Usage**:
 
 ```
-usage: -c [-h] [--skip-rotation] [-v] [--select SELECT] {sign,interval}
+ usage: -c [-h] [--skip-rotation] [-v] [--select SELECT] {sign,interval}
 
-Run the interpreter on a test method.
+Run the interpreter on all test methods.
 
 positional arguments:
-  {sign,interval}       The interpreter to use.
+  {sign,interval}  The interpreter to use.
 
 options:
-  -h, --help            Show this help message and exit
-  --skip-rotation       Skip data rotation.
-  -v, --verbose         Enable debug logging.
-  --select SELECT       Run all tests where the name contains this string.
+  -h, --help       show this help message and exit
+  --skip-rotation  Skip data rotation.
+  -v, --verbose    Enable debug logging.
+  --select SELECT  Select only methods where the name contains this string.
 ```
 
 ## Evaluating Results

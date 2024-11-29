@@ -27,7 +27,7 @@ build-backend = "pdm.backend"
 distribution = true
 
 [tool.pdm.scripts]
-prepare = {call = "scripts.prepare:main"}
+rotate = {call = "scripts.rotate:main"}
 analyse = {call = "scripts.analyse:main"}
 interpret = {call = "scripts.interpret:main"}
 evaluate = {call = "scripts.evaluate:main"}

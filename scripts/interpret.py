@@ -26,11 +26,11 @@ def run_without_parameters(interpreter: AbstractInterpreter, signature: MethodSi
     print()
 
 def main():
-    parser = ArgumentParser(description="Run the interpreter on a test method.")
+    parser = ArgumentParser(description="Run the interpreter on all test methods.")
     parser.add_argument("interpreter", choices=["sign", "interval"], help="The interpreter to use.")
     parser.add_argument("--skip-rotation", action="store_true", help="Skip data rotation.")
     parser.add_argument("-v", "--verbose", action="store_true", help="Enable debug logging.")
-    parser.add_argument("--select", help="Run all tests where name is containing this string.", default="")
+    parser.add_argument("--select", help="Select only methods where the name contains this string.")
 
     args = parser.parse_args()
 

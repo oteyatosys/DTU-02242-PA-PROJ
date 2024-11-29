@@ -10,20 +10,16 @@ from typing import Set
 from reader.method_signature import MethodSignature
 from reader.program import Program
 
-project_root = Path(__file__).parent.parent
-data_dir: Path = project_root / "data"
-
-new_dir = data_dir / "new"
-old_dir = data_dir / "old"
-
 def main():
-    parser = ArgumentParser(description="Debug tool to run a predictive test selection on the programs in the data directory.")
+    parser = ArgumentParser(description="Debug tool to run a predictive test selection using specified program directories.")
     parser.add_argument("predictor", choices=["sign", "interval", "callgraph"], help="The predictor to use for the analysis.")
+    parser.add_argument("--new", type=Path, help="Path to the new program directory.")
+    parser.add_argument("--old", type=Path, help="Path to the old program directory.")
     
     args = parser.parse_args()
 
-    new_program = Program.load(new_dir)
-    old_program = Program.load(old_dir)
+    new_program = Program.load(args.new)
+    old_program = Program.load(args.old)
 
     if args.predictor == "sign":
         predictor: TestPredictor = AbstractSignPredictor()
