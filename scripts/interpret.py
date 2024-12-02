@@ -8,6 +8,7 @@ from static_analysis.interpreter.abstract_sign_interpreter import PC, AbstractSi
 from static_analysis.interpreter.abstract_interval_interpreter import AbstractIntervalInterpreter
 from static_analysis.interpreter.abstractions.abstract_state import AbstractState
 from preparation.prepare import perform_data_rotation
+import time
 
 import logging as l
 
@@ -46,6 +47,10 @@ def main():
             project_root / "data"
         )
 
+
+    # Time the interpreter
+    start = time.time()
+
     # Load the interpreter with the program
     program = Program.load(project_root / "data" / "new")
     if args.interpreter == "sign":
@@ -53,11 +58,16 @@ def main():
     elif args.interpreter == "interval":
         interpreter = AbstractIntervalInterpreter(program)
 
+
     # Run the interpreter on all, or specific, test methods
     for _, method in program.all_test_methods():
         if args.select not in method.signature.name:
             continue
         run_without_parameters(interpreter, method.signature)
+
+    end = time.time()
+
+    print(f"Time taken: {end - start:.5f}s")
 
 if __name__ == "__main__":
     main()
